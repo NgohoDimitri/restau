@@ -1030,27 +1030,39 @@ class CashViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         user = self.request.user
         cash_form = CashForm(request.data)
-        if Cash.objects.filter(user=user,is_active=True, type_cash='CASH_COUNTERS', deleted = False).exists():
-            raise Exception("Session déjà ouverte")
-        get_cash = Cash.objects.filter(hospital=self.request.user.hospital, user_id=user.id, is_active=False, type_cash='CASH_COUNTERS', deleted=False).order_by('-id').last()
-        if user.check_password(request.data['password']):
+        if request.data['type_cash'] == 'CASH_COUNTERS':
+            cash = Cash.objects.filter(user=user,is_active=True, type_cash='CASH_COUNTERS', deleted = False).last()
+            if cash:
+                raise Exception("Session déjà ouverte")
+            get_cash = Cash.objects.filter(hospital=self.request.user.hospital, user_id=user.id, is_active=False, type_cash='CASH_COUNTERS', deleted=False).order_by('-id').last()
+            if user.check_password(request.data['password']):
+                if cash_form.is_valid():
+                    cash = cash_form.save()
+                    cash.hospital = self.request.user.hospital
+                    cash.user_id = user.id
+                    if get_cash:
+                        cash.balance = int(request.data['cash_fund']) + int(get_cash.balance) + int(get_cash.cash_fund)
+                        cash.cash_fund = int(request.data['cash_fund']) + int(get_cash.cash_fund)
+                    else:
+                        cash.balance = request.data['cash_fund']
+                        cash.cash_fund = request.data['cash_fund']
+                    cash.save()
+                    serializer = self.get_serializer(cash, many=False)
+                    return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+                errors = {**cash_form.errors}
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                errors = {"password": ["Username/Password incorrect."]}
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
             if cash_form.is_valid():
                 cash = cash_form.save()
                 cash.hospital = self.request.user.hospital
                 cash.user_id = user.id
-                if get_cash:
-                    cash.balance = int(request.data['cash_fund']) + int(get_cash.balance) + int(get_cash.cash_fund)
-                    cash.cash_fund = int(request.data['cash_fund']) + int(get_cash.cash_fund)
-                else:
-                    cash.balance = request.data['cash_fund']
-                    cash.cash_fund = request.data['cash_fund']
                 cash.save()
                 serializer = self.get_serializer(cash, many=False)
                 return Response(data=serializer.data, status=status.HTTP_201_CREATED)
             errors = {**cash_form.errors}
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            errors = {"password": ["Username/Password incorrect."]}
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
@@ -1265,6 +1277,17 @@ class CashViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='all')
     def get_all_cash(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True, ).data
+        content = {'content': serializer}
+        # patient_id = self.request.query_params.get("patient_id")
+        # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
+        # content = {'content': {'solde_patient': get_bills}}
+        return Response(data=content, status=status.HTTP_200_OK)    
+    
+    @action(detail=False, methods=['get'], url_path='all_om_momo')
+    def get_all_cash(self, request, *args, **kwargs):
+        type_cashs = self.request.GET.getlist('type_cashs[]')
+        queryset = self.filter_queryset(self.get_queryset()).filter(type_cash__in=type_cashs)
         serializer = self.get_serializer(queryset, many=True, ).data
         content = {'content': serializer}
         # patient_id = self.request.query_params.get("patient_id")
@@ -1500,14 +1523,48 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
                             cash_movement.balance_before = get_cash.balance
                             balance = int(get_cash.balance) - int(request.data['amount_movement'])
                             cash_movement.balance_after = balance
+                            
                             get_cash.balance = balance
                             get_cash.save()
+                            if request.data['type_cash'] == 'OM':
+                                get_cash_om = Cash.objects.filter(id=request.data['other_cash'],is_active=True, hospital = user.hospital, type_cash='OM', deleted = False).last()
+                                if get_cash_om.cash_fund > 0:
+                                    get_cash_om.cash_fund -= int(request.data['amount_movement'])
+                                    get_cash_om.save()
+                                    cash_movement.cash_origin_id = request.data['other_cash']
+                                else:
+                                    errors = {"balance": ["Solde insuffisant."]}
+                                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+                            if request.data['type_cash'] == 'MOMO':
+                                get_cash_om = Cash.objects.filter(id=request.data['other_cash'],is_active=True, hospital = user.hospital, type_cash='MOMO', deleted = False).last()
+                                if get_cash_om.cash_fund > 0:
+                                    get_cash_om.cash_fund -= int(request.data['amount_movement'])
+                                    get_cash_om.save()
+                                    cash_movement.cash_origin_id = request.data['other_cash']
+                                else:
+                                    errors = {"balance": ["Solde insuffisant."]}
+                                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+                                
                         if request.data['type'] == 'ENTRY':
                             cash_movement.balance_before = get_cash.balance
                             balance = int(get_cash.balance) + int(request.data['amount_movement'])
                             cash_movement.balance_after = balance
                             get_cash.balance = balance
                             get_cash.save()
+
+                            if request.data['type_cash'] == 'OM':
+                                get_cash_om = Cash.objects.filter(id=request.data['other_cash'],is_active=True, hospital = user.hospital, type_cash='OM', deleted = False).last()
+                                get_cash_om.cash_fund += int(request.data['amount_movement'])
+                                get_cash_om.save()
+                                cash_movement.cash_origin_id = request.data['other_cash']
+
+                            if request.data['type_cash'] == 'MOMO':
+                                get_cash_momo = Cash.objects.filter(id=request.data['other_cash'],is_active=True, hospital = user.hospital, type_cash='MOMO', deleted = False).last()
+                                get_cash_momo.cash_fund += int(request.data['amount_movement'])
+                                get_cash_momo.save()
+                                cash_movement.cash_origin_id = request.data['other_cash']
+
                         cash_movement.save()
                         serializer = self.get_serializer(cash_movement, many=False)
                         if 'print' in request.query_params:
@@ -6756,16 +6813,13 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
                     get_stock.save()
                     
                     unit_cost = detailsSupplies.arrival_price / detailsSupplies.quantity
-                    if get_stock:
-                        old_value = Decimal(get_stock.quantity) * Decimal(get_ingredient.price_per_unit)
-                        new_value = Decimal(detailsSupplies.quantity) * Decimal(unit_cost)
+                    old_value = Decimal(get_stock.quantity) * Decimal(get_ingredient.price_per_unit)
+                    new_value = Decimal(detailsSupplies.quantity) * Decimal(unit_cost)
 
-                        total_qty = Decimal(get_stock.quantity) + Decimal(detailsSupplies.quantity)
-                        price = (old_value + new_value) / total_qty
+                    total_qty = Decimal(get_stock.quantity) + Decimal(detailsSupplies.quantity)
+                    price = (old_value + new_value) / total_qty
 
-                        detailsSupplies.cmup = price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-                    else:
-                        pass
+                    detailsSupplies.cmup = price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
                 else:
                     Stock.objects.create(hospital=user.hospital,ingredient_id=detailsSupplies.ingredient_id, quantity = detailsSupplies.quantity,quantity_two = detailsSupplies.quantity_two, storage_depots_id=request.data['storage_depots'])

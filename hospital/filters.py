@@ -490,7 +490,8 @@ class CashFilter(django_filters.FilterSet):
     hospital = django_filters.CharFilter(field_name='hospital__id', lookup_expr='exact')
     wording = django_filters.CharFilter(lookup_expr='icontains')
     session = django_filters.CharFilter(lookup_expr='icontains')
-    tyep_cash = django_filters.CharFilter(lookup_expr='icontains')
+    type_cash = django_filters.CharFilter(lookup_expr='icontains')
+    type_cashs = django_filters.BaseInFilter(field_name='type_cash', lookup_expr='in')
     open_date = django_filters.CharFilter(lookup_expr='iexact')
     close_date = django_filters.CharFilter(lookup_expr='iexact')
     is_active = django_filters.BooleanFilter(lookup_expr='exact')
@@ -499,9 +500,12 @@ class CashFilter(django_filters.FilterSet):
     cash_fund = django_filters.CharFilter(lookup_expr='icontains')
     user = django_filters.CharFilter(field_name='user__id', lookup_expr='exact')
 
+    # def filter_type_cash(self, queryset, name, value):
+    #     return queryset.filter(type_cash__in=value)
+
     class Meta:
         model = Cash
-        fields = {'id': ['exact']}
+        fields = ['id', 'type_cashs']
 
 
 # class ModuleFilter(django_filters.FilterSet):
