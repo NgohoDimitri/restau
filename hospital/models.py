@@ -814,6 +814,7 @@ class Stock_movement(SyncBaseModel):
     reason_movement = models.CharField(max_length=255, null=True, blank=True)
     code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    date_movement = models.DateField(null=True, blank=True)
     is_valid= models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):
@@ -852,6 +853,7 @@ class Bills(SyncBaseModel):
     delivery_man = models.CharField(max_length=100, null=True, blank=True)
     # expected_duration  = models.IntegerField(default=0, null=True, blank=True)
     # expected_time = models.DateTimeField(null=True, blank=True)
+    bills_date = models.DateField(null=True, blank=True)
 
     event_name = models.CharField(max_length=150,null=True,)
     organizer = models.CharField(max_length=150,null=True,)
@@ -1501,6 +1503,7 @@ class Inventory(SyncBaseModel):
     is_shared = models.BooleanField(default=False, null=True)  # Partagé entre structures
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, null=True)
     reason_inventory = models.CharField(max_length=255, null=True, blank=True)
+    date_inventory = models.DateField(null=True, blank=True)
     storage_depots = models.ForeignKey(Storage_depots, on_delete=models.CASCADE, null=True)
     code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -1577,6 +1580,7 @@ class Supplies(SyncBaseModel):
     reference_no = models.CharField(max_length=255, null=True, blank=True)
     storage_depots = models.ForeignKey(Storage_depots, on_delete=models.CASCADE, null=True)
     supply_amount = models.IntegerField(default=0)
+    arrival_date = models.DateField(null=True, blank=True)
     is_accounted = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     

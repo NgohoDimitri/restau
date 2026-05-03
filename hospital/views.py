@@ -70,7 +70,7 @@ from openpyxl.styles import Alignment, Font
 from decimal import Decimal, ROUND_HALF_UP
 
 
-from .helpers import apply_promotions, apply_reduction, checkContent, checkContentPhone, destocker, destocker_compose, first_date_of_month, get_applicable_reduction, get_future_remise_notification, get_prepaid_account_detail, last_date_of_month, link_callback, archive, get_last_date_of_month, get_first_date_of_month, get_back, get_archive, \
+from .helpers import apply_promotions, apply_reduction, checkContent, checkContentPhone, destocker, destocker_compose, first_date_of_month, formatted_date, get_applicable_reduction, get_future_remise_notification, get_prepaid_account_detail, last_date_of_month, link_callback, archive, get_last_date_of_month, get_first_date_of_month, get_back, get_archive, \
     delete_archive, normalize_rules, restore, backup_all, save_bills, setup_hospital_permissions, split_entry_exit
 
 
@@ -2565,6 +2565,8 @@ class SuppliesViewSet(viewsets.ModelViewSet):
             supplies.supply_amount=request.data['supply_amount']
             supplies.storage_depots_id=request.data['storage_depots']
             supplies.supply_amount=request.data['supply_amount']
+            
+            supplies.createdAt=formatted_date(date_str=request.data['arrival_date'])
             supplies.save()
                 
             serializer = self.get_serializer(supplies, many=False)
@@ -7665,6 +7667,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             get_inventory = Inventory.objects.filter(hospital = self.request.user.hospital, user=self.request.user, id=request.data['inventory'], deleted = False).last()
             get_inventory.storage_depots_id = request.data['storage_depots']
             get_inventory.reason_inventory = request.data['reason_inventory']
+            get_inventory.createdAt = formatted_date(date_str=request.data['date_inventory'])
             get_inventory.save()
             get_details_inv = DetailsInventory.objects.filter(hospital = self.request.user.hospital, inventory_id=request.data[
                     'inventory']).filter(deleted=False)
@@ -7989,6 +7992,7 @@ class Stock_movementViewSet(viewsets.ModelViewSet):
             get_stock_movement.type_movement = request.data['type_movement']
             get_stock_movement.reason_movement = request.data['reason_movement']
             get_stock_movement.movement_value = request.data['movement_value']
+            get_stock_movement.createdAt = formatted_date(date_str=request.data['date_movement'])
             get_stock_movement.save()
             
             serializer = self.get_serializer(get_stock_movement, many=False)

@@ -616,6 +616,24 @@ def checkBool(content):
         cont = True
     return cont
 
+def formatted_date(date_str):
+    # Parse the date
+    date_part = datetime.strptime(date_str, "%Y-%m-%d")
+
+    # Get current time
+    now = datetime.now()
+
+    # Combine date + current time
+    dt_with_current_time = date_part.replace(
+        hour=now.hour,
+        minute=now.minute,
+        second=now.second,
+        microsecond=now.microsecond
+    )
+
+    formatted = dt_with_current_time.strftime("%Y-%m-%d %H:%M:%S")
+    return formatted
+
 import math
 def checkContentPhone(content):
     if type(content) == str:

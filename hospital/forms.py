@@ -214,6 +214,8 @@ class SuppliesForm(forms.ModelForm):
     storage_depots = forms.ModelChoiceField(required=False, queryset=Storage_depots.objects.all())
     code = forms.CharField(required=False)
     reference_no = forms.CharField(required=False)
+    arrival_date = forms.CharField(required=False)
+    arr = forms.CharField(required=False)
     supply_amount = forms.IntegerField(required=False)
     additional_info = forms.CharField(max_length=255, required=False)
     is_accounted = forms.BooleanField(initial=False, required=False)
@@ -252,6 +254,7 @@ class InventoryForm(forms.ModelForm):
     hospital = forms.ModelChoiceField(required=False, queryset=Hospital.objects.all())
     storage_depots = forms.ModelChoiceField(required=False, queryset=Storage_depots.objects.all())
     code = forms.CharField(required=False)
+    date_inventory = forms.CharField(required=False)
     reason_inventory = forms.CharField(required=False)
 
     class Meta:
@@ -289,6 +292,7 @@ class BillsForm(forms.ModelForm):
     patient_type = forms.CharField(max_length=255, required=False)
     amount_om = forms.CharField(required=False)
     amount_prepaid = forms.CharField(required=False)
+    bills_date = forms.CharField(required=False)
     amount_momo = forms.CharField(required=False)
     amount_cash = forms.CharField(required=False)
     amount_bank_card = forms.CharField(required=False)
@@ -375,13 +379,14 @@ class Stock_movementForm(forms.ModelForm):
     storage_depots_dest = forms.ModelChoiceField(required=False, queryset=Storage_depots.objects.all())
     code = forms.CharField(required=False)
     type_movement = forms.CharField(required=False)
+    date_movement = forms.CharField(required=False)
     reason_movement = forms.CharField(required=False)
     is_valid = forms.CharField(required=False)
     movement_value = forms.CharField(required=False)
 
     class Meta:
         model = Stock_movement
-        fields = ('sync_version','is_shared','hospital',
+        fields = ('sync_version','is_shared','hospital','date_movement',
             'code', 'type_movement', 'reason_movement', 'storage_depots','storage_depots_dest', 'movement_value', 'is_valid')
 
 
