@@ -530,6 +530,17 @@ class UserViewSet(viewsets.ModelViewSet):
                             extended_permissions__hospital=self.request.user.hospital,
                             extended_permissions__is_active=True
                         )
+                        if not permissions:
+                            permissions = Permission.objects.all()
+                        for perm in permissions:
+                            if ExtendedPermission.objects.filter(permission=perm, hospital=self.request.user.hospital).last():
+                                pass
+                            else:
+                                ExtendedPermission.objects.get_or_create(
+                                    permission=perm,
+                                    hospital=self.request.user.hospital,
+                                    defaults={'is_shared': False}
+                                )
 
                     group.permissions.set(permissions)
 
