@@ -81,15 +81,14 @@
         <div class="info-row">
             <table class="table">
                 <tr>
-                    <td class="info-label">{% if lang == 'fr' %} CAISSE {% else %} CASH {% endif %}: {{ cash.code }}</td>
-                    <td class="info-label">{% if lang == 'fr' %} CAISSIER {% else %} CASHER {% endif %} : {{ cash.user.username }}</td>
-                    <td class="info-label">{% if lang == 'fr' %} DATE D'OUVERTURE {% else %} OPEN DATE {% endif %} : {{ cash.open_date }}</td>
+                    <td class="info-label">{% if lang == 'fr' %} PERIODE DU {% else %} PERIOD FROM {% endif %}: {{ start_date }}</td>
+                    <td class="info-label">{% if lang == 'fr' %} AU {% else %} TO {% endif %} : {{ end_date }}</td>
                 </tr>
             </table>
         </div>
     </div>
-<table>
     <br>
+<table>
 <tr>
     {% if lang == 'fr' %}
     <td style="font-family:Verdana, Geneva, sans-serif; font-weight:600; font-size:13px;" align="center" colspan="2">LISTE DES MOUVEMENTS DE CAISSE</td>

@@ -1,6 +1,6 @@
 import django_filters
 
-from hospital.models import DetailsBillsIngredient, DetailsStock_movement, ExtendedGroup, DetailsPatientAccount, MovementStock, PatientAccount, District, Insurance, Recipes, Stock, Stock_movement, Storage_depots, Type_patient, User, Hospital, Patient, Expenses_nature, \
+from hospital.models import DetailsBillsIngredient, DetailsStock_movement, ExtendedGroup, DetailsPatientAccount, MovementStock, PatientAccount, District, Insurance, Recipes, Season, Stock, Stock_movement, Storage_depots, Type_patient, User, Hospital, Patient, Expenses_nature, \
     Cash, Cash_movement, Category, DetailsSupplies, Bills, \
     DetailsBills,PatientSettlement, Inventory, DetailsInventory, City, Region, Archive, BackupFile, DeliveryInfo, EventInfo, CateringInfo
 
@@ -118,6 +118,8 @@ class PatientFilter(django_filters.FilterSet):
     hospital = django_filters.CharFilter(field_name='hospital__id', lookup_expr='exact')
     email = django_filters.CharFilter(lookup_expr='iexact')
     createdAt = django_filters.CharFilter(lookup_expr='iexact')
+    start_date = django_filters.DateTimeFilter(field_name='createdAt', lookup_expr=('gte'), )
+    end_date = django_filters.DateTimeFilter(field_name='createdAt', lookup_expr=('lte'))
     updateAt = django_filters.CharFilter(lookup_expr='iexact')
     phone = django_filters.CharFilter(lookup_expr='icontains')
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
@@ -596,6 +598,18 @@ class DetailsInventoryFilter(django_filters.FilterSet):
 
     class Meta:
         model = DetailsInventory
+        fields = {'id': ['exact']}
+        
+class SeasonFilter(django_filters.FilterSet):
+    is_active = django_filters.BooleanFilter(lookup_expr='exact')
+    hospital = django_filters.CharFilter(field_name='hospital__id', lookup_expr='exact')
+    name_language = django_filters.CharFilter(lookup_expr='icontains')
+    type = django_filters.CharFilter(lookup_expr='icontains')
+    start_date = django_filters.CharFilter(lookup_expr='icontains')
+    end_date = django_filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Season
         fields = {'id': ['exact']}
 
 

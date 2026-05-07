@@ -6,7 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import routers
-from hospital.views import DetailsBillsIngredientViewSet, DetailsInventoryViewSet, DetailsPatientAccountViewSet, DetailsStock_movementViewSet, MovementStockViewSet, PatientAccountViewSet, DistrictViewSet, Stock_movementViewSet, StockViewSet, Storage_depotsViewSet, Type_patientViewSet, UserViewSet, HospitalViewSet, home_view, profile_view, \
+from hospital.views import DetailsBillsIngredientViewSet, DetailsInventoryViewSet, DetailsPatientAccountViewSet, DetailsStock_movementViewSet, MovementStockViewSet, PatientAccountViewSet, DistrictViewSet, SeasonViewSet, Stock_movementViewSet, StockViewSet, Storage_depotsViewSet, Type_patientViewSet, UserViewSet, HospitalViewSet, home_view, profile_view, \
     InsuranceViewSet, PatientViewSet, \
     Expenses_natureViewSet, \
     CashViewSet, Cash_movementViewSet, CategoryViewSet, \
@@ -29,6 +29,7 @@ router.register(r'type_patients', Type_patientViewSet)
 router.register(r'patients', PatientViewSet)
 router.register(r'expenses_nature', Expenses_natureViewSet)
 router.register(r'cashs', CashViewSet)
+router.register(r'seasons', SeasonViewSet)
 router.register(r'cash_movements', Cash_movementViewSet)
 router.register(r'categories', CategoryViewSet)
 router.register(r'regions', RegionViewSet)

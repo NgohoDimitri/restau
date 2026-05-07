@@ -9,24 +9,25 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 # from django.utils.translation import ugettext_lazy as _
 import math
+from collections import defaultdict
 from io import BytesIO
 from xhtml2pdf import pisa
 from decimal import Decimal
 from django.template.loader import get_template
 from django.http import HttpResponse
 # Create your views here.
-from hospital.forms import DetailsBillsIngredientForm, DetailsInventoryForm, DetailsPatientAccountForm, DetailsStock_movementForm, HospitalFormRule, PatientAccountForm, CateringInfoForm, EventInfoForm,DeliveryInfoForm, CityForm, DistrictForm, InsuranceForm, RegionForm, Stock_movementForm, Storage_depotsForm, Type_patientForm, UserForm, UserFormUpdate, HospitalForm, \
+from hospital.forms import DetailsBillsIngredientForm, DetailsInventoryForm, DetailsPatientAccountForm, DetailsStock_movementForm, HospitalFormRule, PatientAccountForm, CateringInfoForm, EventInfoForm,DeliveryInfoForm, CityForm, DistrictForm, InsuranceForm, RegionForm, SeasonForm, Stock_movementForm, Storage_depotsForm, Type_patientForm, UserForm, UserFormUpdate, HospitalForm, \
     PatientForm, Expenses_natureForm, \
     CashForm, Cash_movementForm, CategoryForm,\
     SuppliesForm, SuppliersForm, DetailsSuppliesForm, BillsForm, DetailsBillsForm,PatientSettlementForm, \
     InventoryForm
-from hospital.models import CategoryTranslation, ComboMenu, ComposeIngredient, ComposePreparation, DetailsBillsIngredient, DetailsComboMenu, DetailsComposeIngredient, DetailsStock_movement, DishPreparation, DishTranslation, ExtendedPermission, DetailsPatientAccount, ExtendedGroup, Ingredient, MovementStock, PatientAccount, RecipeIngredient, District, Insurance, Stock, Storage_depots, StructureArticle, Type_patient, User, Hospital, Patient, \
+from hospital.models import CategoryTranslation, ComboMenu, ComposeIngredient, ComposePreparation, DetailsBillsIngredient, DetailsComboMenu, DetailsComposeIngredient, DetailsStock_movement, DishPreparation, DishTranslation, ExtendedPermission, DetailsPatientAccount, ExtendedGroup, Ingredient, MovementStock, PatientAccount, RecipeIngredient, District, Insurance, Season, SeasonTranslation, Stock, Storage_depots, StructureArticle, Type_patient, User, Hospital, Patient, \
     Expenses_nature,  Cash, Cash_movement, Category, Supplies, Suppliers, \
     DetailsSupplies, Bills, DetailsBills,PatientSettlement, Stock_movement, \
     Inventory, DetailsInventory, City, Region, \
      Archive, BackupFile, DeliveryInfo, EventInfo, CateringInfo, WarehouseTranslation
 from hospital.serializers import DetailsBillsIngredientSerializer, DetailsPatientAccountSerializer, DetailsStock_movementSerializer, ExtendedGroupSerializer, IngredientSerializer, MovementStockSerializer,PatientAccountSerializer,DeliveryInfoSerializer, CateringInfoSerializer,EventInfoSerializer, DistrictSerializer, InsuranceSerializer, \
-    BillsSerializerAnalysis, Stock_movementSerializer, StockSerializer, Storage_depotsSerializer, Type_patientSerializer,UserSerializer, MyTokenObtainPairSerializer, \
+    BillsSerializerAnalysis, SeasonSerializer, Stock_movementSerializer, StockSerializer, Storage_depotsSerializer, Type_patientSerializer,UserSerializer, MyTokenObtainPairSerializer, \
     TokenRefreshSerializer, \
     ChangePasswordSerializer, HospitalSerializer, \
     PatientSerializer, \
@@ -44,7 +45,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from globals.pagination import CustomPagination
 from rest_framework import status
-from .filters import DetailsBillsIngredientFilter, DetailsPatientAccountFilter, DetailsStock_movementFilter, MovementStockFilter, PatientAccountFilter,EventInfoFilter, CateringInfoFilter, DeliveryInfoFilter, DistrictFilter, InsuranceFilter, Stock_movementFilter, StockFilter, Storage_depotsFilter, Type_patientFilter, UserFilter, HospitalFilter, \
+from .filters import DetailsBillsIngredientFilter, DetailsPatientAccountFilter, DetailsStock_movementFilter, MovementStockFilter, PatientAccountFilter,EventInfoFilter, CateringInfoFilter, DeliveryInfoFilter, DistrictFilter, InsuranceFilter, SeasonFilter, Stock_movementFilter, StockFilter, Storage_depotsFilter, Type_patientFilter, UserFilter, HospitalFilter, \
     PatientFilter, Expenses_natureFilter, \
     CashFilter, Cash_movementFilter, CategoryFilter,  SuppliesFilter, \
     SuppliersFilter, DetailsSuppliesFilter, BillsFilter, DetailsBillsFilter, PatientSettlementFilter, \
@@ -56,10 +57,10 @@ from rest_framework.decorators import action, permission_classes, api_view
 from django.shortcuts import render
 from collections import OrderedDict
 from itertools import chain
-from django.db.models import F, Sum,  Count
+from django.db.models import F, Sum,  Count, Q
 from track_actions.models import History
 from django.shortcuts import get_object_or_404
-
+from django.db.models.functions import Coalesce
 import shutil
 from django.core.management import call_command
 from django.conf import settings
@@ -1229,6 +1230,40 @@ class CashViewSet(viewsets.ModelViewSet):
         content = {'content': {'cash_movement': serializer.data, 'settlement': serializer_settle.data}}
         return Response(data=content, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], url_path='export_all')
+    def export_all(self, request, *args, **kwargs):
+        startdate = request.query_params.get("start_date")
+        enddate = request.query_params.get("end_date")
+        queryset_cash = Cash_movement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
+        serializer_cash = Cash_movementSerializer(queryset_cash, many=True)
+        queryset_settelment = PatientSettlement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
+        serializer_settlement = PatientSettlementSerializer(queryset_settelment, many=True)
+        # if 'type' in self.request.query_params:
+        #     queryset = self.filter_queryset(self.get_queryset()).filter(deleted=False).order_by('-createdAt')
+        # else:
+        #     queryset = self.filter_queryset(self.get_queryset()).filter(cash_id=get_cash.id).filter(deleted=False).order_by('-createdAt')
+        sum_total_in = queryset_cash.filter(type='ENTRY').aggregate(Sum('amount_movement'))
+        sum_total_out = queryset_cash.filter(type='EXIT').aggregate(Sum('amount_movement'))
+        sum_cash = queryset_settelment.aggregate(Sum('amount_cash'))
+        sum_om = queryset_settelment.aggregate(Sum('amount_om'))
+        sum_momo = queryset_settelment.aggregate(Sum('amount_momo'))
+        sum_prepaid = queryset_settelment.aggregate(Sum('amount_prepaid'))
+        html_render = get_template('export_movement_cash_all.html')
+        html_content = html_render.render(
+            {'movements': serializer_cash.data,'start_date': startdate,'end_date': enddate,'sum_cash': sum_cash['amount_cash__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'settlements': serializer_settlement.data, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html_content.encode("utf-16")), result,
+                                    link_callback=link_callback)
+        if not pdf.err:
+            response = HttpResponse(result.getvalue(), content_type='application/pdf')
+            filename = 'Export' + datetime.today().strftime("%Y-%m-%d %H:%M:%S") + '.pdf'
+            response['Content-Disposition'] = 'inline; filename="' + filename + '"'
+            response['Access-Control-Expose-Headers'] = 'Content-Disposition,X-Suggested-Filename'
+            return response
+        else:
+            errors = {"pdf": ["Error to generate PDF."]}
+            return Response(data=errors, status=status.HTTP_500)
+        
     @action(detail=False, methods=['get'], url_path='export_movements_analysis')
     def export_movements_analysis(self, request, *args, **kwargs):
         startdate = request.query_params.get("start_date")
@@ -1667,28 +1702,29 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='all')
     def get_all_mvt(self, request, *args, **kwargs):
         user = self.request.user
-        if 'id' in self.request.query_params:
-            get_cash = Cash_movement.objects.filter(hospital=user.hospital,id=self.request.query_params.get('id'), deleted = False).last()
-        else:
-            get_cash = Cash_movement.objects.filter(hospital=user.hospital, deleted = False).last()
+        get_cash = Cash.objects.get(id=self.request.query_params.get('cash'), hospital=self.request.user.hospital)
         # if 'type' in self.request.query_params:
         #     queryset = Cash_movement.objects.filter(type__icontains=self.request.query_params.get('type'), cash_id=get_cash.id).filter(deleted=False).order_by('-createdAt')
         # else:
         #     queryset = Cash_movement.objects.filter(cash_id=get_cash.id).filter(deleted=False).order_by('-createdAt')
-        if user.hospital:
-            queryset = self.filter_queryset(self.get_queryset()).filter(hospital=user.hospital).filter(deleted=False).order_by('-createdAt')
-        else:
-            queryset = self.filter_queryset(self.get_queryset()).filter(deleted=False).order_by('-createdAt')
+        queryset = self.filter_queryset(self.get_queryset()).order_by('-createdAt')
+        queryset_settelment = PatientSettlement.objects.filter(cash_id=self.request.query_params.get('cash')).all().order_by('-createdAt')
+        serializer_settlement = PatientSettlementSerializer(queryset_settelment, many=True)
         # if 'type' in self.request.query_params:
         #     queryset = self.filter_queryset(self.get_queryset()).filter(deleted=False).order_by('-createdAt')
         # else:
         #     queryset = self.filter_queryset(self.get_queryset()).filter(cash_id=get_cash.id).filter(deleted=False).order_by('-createdAt')
         serializer = self.get_serializer(queryset, many=True)
         if self.request.query_params.get("export") == 'pdf':
-            sum_total = queryset.aggregate(Sum('amount_movement'))
+            sum_total_in = queryset.filter(type='ENTRY').aggregate(Sum('amount_movement'))
+            sum_total_out = queryset.filter(type='EXIT').aggregate(Sum('amount_movement'))
+            sum_cash = queryset_settelment.aggregate(Sum('amount_cash'))
+            sum_om = queryset_settelment.aggregate(Sum('amount_om'))
+            sum_momo = queryset_settelment.aggregate(Sum('amount_momo'))
+            sum_prepaid = queryset_settelment.aggregate(Sum('amount_prepaid'))
             html_render = get_template('export_movement_cash.html')
             html_content = html_render.render(
-                {'movements': serializer.data, 'hospital': self.request.user.hospital, 'sum_total': sum_total['amount_movement__sum']})
+                {'cash':get_cash,'movements': serializer.data,'sum_cash': sum_cash['amount_cash__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'settlements': serializer_settlement.data, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
             result = BytesIO()
             pdf = pisa.pisaDocument(BytesIO(html_content.encode("utf-16")), result,
                                         link_callback=link_callback)
@@ -1875,6 +1911,162 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class SeasonViewSet(viewsets.ModelViewSet):
+    queryset = Season.objects.filter(deleted=False)
+    serializer_class = SeasonSerializer
+    renderer_classes = [JSONRenderer]
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    pagination_class = CustomPagination
+    filterset_class = SeasonFilter
+    filter_backends = (filters.DjangoFilterBackend,)
+    
+    # def get_queryset(self):
+    #     # if self.request.user.hospital:
+    #     #     user_hospital = self.request.user.hospital
+    #     #     return Category.objects.filter(deleted=False, hospital=user_hospital)
+    #     # else:
+    #     return Category.objects.filter(deleted=False)
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == 'create':
+            user = self.request.user
+            if isinstance(user, User):
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    def create(self, request, *args, **kwargs):
+
+        category_form = SeasonForm(request.data)
+        if category_form.is_valid():
+            obj = category_form.save()
+            # obj.hospital = self.request.user.hospital
+            obj.save()
+            for translate in self.request.data['name_language']:
+                get_translate = SeasonTranslation.objects.filter(season_id=obj.id, language=translate['language'], deleted = False).last()
+                if get_translate:
+                    get_translate.name = translate['name']
+                    get_translate.save()
+                else:
+                    SeasonTranslation.objects.create(user=self.request.user, season_id=obj.id, language=translate['language'], name = translate['name'])
+            
+            serializer = self.get_serializer(obj, many=False)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        errors = {**category_form.errors}
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        category = self.get_object()
+        category_form = SeasonForm(request.data, instance=category)
+        if category_form.is_valid():
+            obj = category_form.save()
+            obj.save()
+            for translate in self.request.data['name_language']:
+                get_translate = SeasonTranslation.objects.filter(season_id=obj.id, language=translate['language'], deleted = False).last()
+                if get_translate:
+                    get_translate.name = translate['name']
+                    get_translate.save()
+                else:
+                    SeasonTranslation.objects.create(user=self.request.user, season_id=obj.id, language=translate['language'], name = translate['name'])
+            
+            serializer = self.get_serializer(obj, many=False)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        errors = {**category_form.errors}
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.deleted = True
+        obj.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+ 
+    
+    @action(detail=False, methods=['post'], url_path='upload', permission_classes=[AllowAny])
+    def upload_file(self, request, *args, **kwargs):
+        if request.FILES:
+            if "file" in request.FILES:
+                file = request.FILES.get("file")
+                # fs = FileSystemStorage()
+                # filename = fs.save(file.name, file)
+                # uploaded_file_url = fs.url(filename)
+                empexceldata = pd.read_excel(file)
+                dbframe = empexceldata
+                data = {}
+                for dbframe in dbframe.itertuples():
+                    get_obj = Category.objects.filter(translations__name__icontains=dbframe.Nom_fr, hospital=self.request.user.hospital, deleted = False).last()
+                    if get_obj:
+                        pass
+                    else:
+                        get_obj = Category.objects.filter(translations__name__icontains=dbframe.Nom_en, hospital=self.request.user.hospital, deleted = False).last()
+                    
+                    langue = [{"name": checkContent(content=dbframe.Nom_fr), "saved": False, "language": "fr"}, {"name": checkContent(content=dbframe.Nom_en), "saved": False, "language": "en"}]
+
+                    if get_obj is None:
+                        obj = Category.objects.create(hospital = self.request.user.hospital, name_language=langue)
+
+                        for translate in langue:
+                            get_translate = CategoryTranslation.objects.filter(hospital = self.request.user.hospital, category_id=obj.id, language=translate['language'], deleted = False).last()
+                            if get_translate:
+                                get_translate.name = translate['name']
+                                get_translate.save()
+                            else:
+                                CategoryTranslation.objects.create(hospital = self.request.user.hospital, user=self.request.user, category_id=obj.id, language=translate['language'], name = translate['name'])
+
+                    else:
+                        for translate in langue:
+                            get_translate = CategoryTranslation.objects.filter(hospital = self.request.user.hospital, category_id=get_obj.id, language=translate['language'], deleted = False).last()
+                            if get_translate:
+                                get_translate.name = translate['name']
+                                get_translate.save()
+                            else:
+                                CategoryTranslation.objects.create(hospital = self.request.user.hospital, user=self.request.user, category_id=get_obj.id, language=translate['language'], name = translate['name'])
+
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='all')
+    def get_all_exp(self, request, *args, **kwargs):
+        
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True, ).data
+        content = {'content': serializer}
+        # patient_id = self.request.query_params.get("patient_id")
+        # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
+        # content = {'content': {'solde_patient': get_bills}}
+        return Response(data=content, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['post'], url_path='name/exists', permission_classes=[AllowAny])
+    def check_category(self, request, *args, **kwargs):
+        data = request.data
+        errors = {"name": ["This field already exists."]}
+        if 'name' in data:
+            category = Category.objects.filter(hospital=self.request.user.hospital,translations__name__icontains=data['name_language'], deleted = False)
+            if category:
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='translate/exists', permission_classes=[AllowAny])
+    def check_translate(self, request, *args, **kwargs):
+        data = request.data
+        errors = {"name": ["This field already exists."]}
+        if 'title' in data:
+            obj = CategoryTranslation.objects.filter(name__icontains=data['name'], deleted = False)
+            if obj:
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # class ModuleViewSet(viewsets.ModelViewSet):
@@ -3618,7 +3810,6 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
             })
 
         # Si tu veux grouper par plat et sommer les quantités
-        from collections import defaultdict
         agg = defaultdict(lambda: {'total_qty': 0})
         for r in result:
             key = r['dish_id']
@@ -3654,7 +3845,26 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
                 details.save()
             get_details_bills.save()
         return Response(status=status.HTTP_200_OK)
-
+    
+    @action(detail=False, methods=['get'], url_path='details')
+    def get_details(self, request, *args, **kwargs):
+        
+        queryset = self.filter_queryset(self.get_queryset()).select_related('dish').filter(hospital=self.request.user.hospital).values('dish__id','dish__name_language').annotate(
+            total_quantity=Sum('quantity_served'),
+            total_pun=Sum('pun'),
+            total_amount=Sum('amount_net'),
+            total_cost_production=Sum('cost_production'),
+            total_margin=Sum('margin'),
+            total_lines=Count('id')
+        ).order_by('-total_quantity')
+        
+        
+        # serializer = self.get_serializer(queryset, many=True, ).data
+        content = {'content': queryset}
+        # patient_id = self.request.query_params.get("patient_id")
+        # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
+        # content = {'content': {'solde_patient': get_bills}}
+        return Response(data=content, status=status.HTTP_200_OK)
     # @action(detail=False, methods=['get'], url_path='stock_available')
     # def stock_available(self, request):
     #     get_product = DetailsSupplies.objects.filter(supplies__storage_depot=request.query_params.get("id")).order_by(
@@ -3676,7 +3886,9 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
     #     serializer = DetailsBillsSerializer(get_product, many=True)
     #     content = {'content': serializer.data}
     #     return Response(data=content, status=status.HTTP_200_OK)
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, TruncHour
+from itertools import groupby
+
 class BillViewSet(viewsets.ModelViewSet):
     queryset = Bills.objects.all()
     serializer_class = BillsSerializer
@@ -4748,6 +4960,137 @@ class BillViewSet(viewsets.ModelViewSet):
             content = {'content': bills}
             return Response(data=content, status=status.HTTP_200_OK)
  
+    @action(detail=False, methods=['post', 'get'], url_path='statistic_hours')
+    def get_statistic_hours(self, request):
+        date_month = request.data['start_date_month_first']
+        year_month = {}
+        startdate = ''
+        enddate = ''
+        if date_month is None:
+            today = date.today()
+            year_month['year'] = today.year
+            year_month['month'] = today.month
+            startdate = get_first_date_of_month(year=int(year_month['year']), month=int(year_month['month']))
+            enddate = get_last_date_of_month(year=int(year_month['year']), month=int(year_month['month']))
+
+        else:
+            startdate = request.data['start_date_month_first']
+            enddate = request.data['end_date_month_first']
+
+        if 'hospital' in self.request.query_params:
+            user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
+        else:
+            user_hospital = self.request.user.hospital
+        lang = self.request.LANGUAGE_CODE
+        if user_hospital:
+            data = (
+                DetailsBills.objects
+                .filter(
+                    deleted=False,
+                    createdAt__range=[startdate, enddate],
+                    dish__isnull=False
+                )
+                .annotate(hour=TruncHour('createdAt'))
+                .values('hour', 'dish__id', 'dish__name_language')
+                .annotate(
+                    total_quantity=Sum('quantity_served'),
+                    total_revenue=Sum('amount_net'),
+                    total_margin=Sum('margin'),
+                    total_lines=Count('id')
+                )
+                .order_by('hour', '-total_revenue')
+            )
+            print('result', data)
+            result = []
+            labels_set = set()
+            dish_set = set()
+            matrix = defaultdict(lambda: defaultdict(int))
+
+            for item in data:
+                hour = item['hour'].strftime('%H:%M')
+                dish_data = item['dish__name_language']
+                dish = next(
+                    (d['name'] for d in dish_data if d.get('language') == lang),
+                    dish_data[0]['name'] if dish_data else 'N/A'
+                )
+                revenue = item['total_revenue'] or 0
+
+                labels_set.add(hour)
+                dish_set.add(dish)
+                matrix[dish][hour] = revenue
+
+            # Trier les heures
+            labels = sorted(labels_set)
+
+            # Construire datasets
+            datasets = []
+            for dish in dish_set:
+                datasets.append({
+                    "label": dish,
+                    "data": [matrix[dish].get(hour, 0) for hour in labels]
+                })
+
+            bills = {
+                "labels": labels,
+                "datasets": datasets
+            }
+            print('result', bills)
+            # for hour, items in groupby(data, key=lambda x: x['hour']):
+            #     top = max(items, key=lambda x: x['total_revenue'])
+            #     result.append(top)
+            
+            # bills = (
+            #         Bills.objects
+            #         .filter(hospital=user_hospital, createdAt__range=[startdate, enddate], deleted=False)
+            #         .annotate(hour=TruncHour('createdAt'))
+            #         .values('hour')
+            #         .annotate(turnover=Sum('amount_paid'))
+            #         .order_by('hour')
+            #     )
+           
+        else:
+            bills = (
+                    Bills.objects
+                    .filter(createdAt__range=[startdate, enddate], deleted=False)
+                    .annotate(hour=TruncHour('createdAt'))
+                    .values('hour')
+                    .annotate(turnover=Sum('amount_paid'))
+                    .order_by('hour')
+                )
+ 
+        if self.request.query_params.get('type') == 'pdf':
+            sum_total = bills.aggregate(Sum('turnover'))
+            html_render = get_template('export_stat_days.html')
+            html_content = html_render.render(
+                {'bills': bills, 'hospital': user_hospital, 'sum_total': sum_total['turnover__sum'],
+                 'month': date_month.split("-")[1], 'year': date_month.split("-")[0],
+                 'date': datetime.today().strftime("%Y-%m-%d %H:%M:%S")})
+            result = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(html_content.encode("ISO-8859-1")), result,
+                                        link_callback=link_callback)
+            if not pdf.err:
+                response = HttpResponse(result.getvalue(), content_type='application/pdf')
+                filename = 'Export' + datetime.today().strftime("%Y-%m-%d %H:%M:%S") + '.pdf'
+                response['Content-Disposition'] = 'inline; filename="' + filename + '"'
+                response['Access-Control-Expose-Headers'] = 'Content-Disposition,X-Suggested-Filename'
+                return response
+            else:
+                errors = {"pdf": ["Error to generate PDF."]}
+                return Response(data=errors, status=status.HTTP_500)
+        else:
+
+            # stat_category = {'category': 'C.A'}
+            # for bill in bills:
+            #     stat_category[bill['category']] = bill['turnover']
+            # content = {'content': {'stat_category': stat_category}}
+            # labels = list()
+            # values = list()
+            # for bill in bills:
+            #     labels.append(bill['category'])
+            #     values.append(bill['turnover'])
+            content = {'content': bills}
+            return Response(data=content, status=status.HTTP_200_OK)
+ 
     @action(detail=False, methods=['post', 'get'], url_path='statistic_days_entry')
     def get_statistic_days_entry(self, request):
         date_month = request.data['start_date_month_entry']
@@ -4885,6 +5228,43 @@ class BillViewSet(viewsets.ModelViewSet):
             #     values.append(bill['turnover'])
             content = {'content': bills}
             return Response(data=content, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post', 'get'], url_path='stat_best_selling_clients')
+    def get_stat_best_selling_clients(self, request):
+        if 'hospital' in self.request.query_params:
+            hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
+        else:
+            hospital = self.request.user.hospital
+        
+        if hospital:
+            # bills = Patient.objects.filter(
+            #     hospital=hospital,
+            #     deleted=False
+            # )
+            patients = Patient.objects.annotate(
+                amount_paid_total=Coalesce(
+                    Sum(
+                        'bills__amount_paid',
+                        filter=Q(bills__deleted=False, hospital=hospital)
+                    ),
+                    0
+                )
+            ).order_by('-amount_paid_total')
+            serializer = PatientSerializer(patients, many=True)
+        else:
+            patients = Patient.objects.annotate(
+                amount_paid_total=Coalesce(
+                    Sum(
+                        'bills__amount_paid',
+                        filter=Q(bills__deleted=False)
+                    ),
+                    0
+                )
+            ).order_by('-amount_paid_total')
+
+            serializer = PatientSerializer(patients, many=True)
+        content = {'content': serializer.data}
+        return Response(data=content, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post', 'get'], url_path='stat_best_selling_products')
     def get_stat_best_selling_products(self, request):
@@ -8557,7 +8937,7 @@ class DetailsBillsIngredientViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class MovementStockViewSet(viewsets.ModelViewSet):
-    queryset = MovementStock.objects.filter(deleted=False)
+    queryset = MovementStock.objects.all()
     serializer_class = MovementStockSerializer
     renderer_classes = [JSONRenderer]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
@@ -8566,18 +8946,11 @@ class MovementStockViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
 
     def get_queryset(self):
-        user = self.request.user
+        user_hospital = self.request.user.hospital
+        if user_hospital:
+            return MovementStock.objects.filter(hospital=user_hospital)
+        return MovementStock.objects.all()
 
-        qs = (
-            MovementStock.objects
-            .select_related('hospital')   # très important
-            .filter(deleted=False)
-        )
-
-        if user.hospital_id:
-            qs = qs.filter(hospital_id=user.hospital_id)
-
-        return qs 
 
     def get_permissions(self):
         """
@@ -8609,7 +8982,6 @@ class MovementStockViewSet(viewsets.ModelViewSet):
         obj_form = DetailsBillsIngredientForm(request.data, instance=obj)
         if obj_form.is_valid():
             obj = obj_form.save()
-            obj.hospital = self.request.user.hospital
             obj.total_amount= self.request.data['quantity'] * self.request.data['impact_price']
             obj.save()
             serializer = self.get_serializer(obj, many=False)
@@ -8620,6 +8992,5 @@ class MovementStockViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        obj.deleted = True
-        obj.save()
+        obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

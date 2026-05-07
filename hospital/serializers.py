@@ -5,7 +5,7 @@ from django.db.models import Sum
 # from django.core.validators import RegexValidator
 # from django.utils.translation import ugettext_lazy as _
 from GH import settings
-from hospital.models import Cash, Cash_movement, Category, CateringInfo, ComboMenu, ComposeIngredient, ComposePreparation, DeliveryInfo, DetailsBillsIngredient, DetailsComboMenu, DetailsComposeIngredient, DetailsComposePreparation, DetailsPatientAccount, DetailsStock_movement, Dish, DishPreparation, EventInfo, Expenses_nature, ExtendedGroup, ExtendedPermission, Ingredient, MovementStock, Patient, PatientAccount, Promotion, PromotionAction, PromotionRule, RecipeIngredient, District, Insurance, Recipes, Stock, Stock_movement, Storage_depots, StructureArticle, User, Hospital,  \
+from hospital.models import Cash, Cash_movement, Category, CateringInfo, ComboMenu, ComposeIngredient, ComposePreparation, DeliveryInfo, DetailsBillsIngredient, DetailsComboMenu, DetailsComposeIngredient, DetailsComposePreparation, DetailsPatientAccount, DetailsStock_movement, Dish, DishPreparation, EventInfo, Expenses_nature, ExtendedGroup, ExtendedPermission, Ingredient, MovementStock, Patient, PatientAccount, Promotion, PromotionAction, PromotionRule, RecipeIngredient, District, Insurance, Recipes, Season, Stock, Stock_movement, Storage_depots, StructureArticle, User, Hospital,  \
     Suppliers, Supplies, DetailsSupplies, Bills, DetailsBills,PatientSettlement,\
     Inventory, DetailsInventory, City, Region, \
     Purchase_order, Archive, BackupFile, Type_patient, DeliveryInfo, EventInfo, CateringInfo, WarehouseTranslation
@@ -261,7 +261,7 @@ class PatientSerializer(DynamicFieldsModelSerializer):
     insurance = InsuranceSerializer(many=False)
     type_patient = Type_patientSerializer(many=False, fields=('id', 'code', 'title'))
     account_patient = serializers.SerializerMethodField()
-    # balance = serializers.SerializerMethodField()
+    amount_paid = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
@@ -269,8 +269,9 @@ class PatientSerializer(DynamicFieldsModelSerializer):
         
     def get_account_patient(self, obj):
         return PatientAccountSerializer(obj.account_patient.filter(type_account='PREPAID'), many=True, fields=('id', 'balance')).data
-    # def get_balance(self, obj):
-    #     return Bills.objects.filter(patient_id=obj, deleted=False).all().aggregate(Sum('balance'))['balance__sum']
+    
+    def get_amount_paid(self, obj):
+        return Bills.objects.filter(patient_id=obj, deleted=False).all().aggregate(Sum('amount_paid'))['amount_paid__sum']
     
     # def get_account_patient(self, obj):
     #     # Utilise le cache prefetch_related si disponible
@@ -800,6 +801,29 @@ class DishSerializer(DynamicFieldsModelSerializer):
         }
 
         return translations.get(lang) or translations.get("fr")
+
+class SeasonSerializer(DynamicFieldsModelSerializer):
+    # recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    # category = CategorySerializer()
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Season
+        fields = '__all__'
+
+    
+
+    def get_name(self, obj):
+        request = self.context.get('request', None)
+        lang = getattr(request, 'LANGUAGE_CODE', 'fr')
+
+        # Essaie la langue de la requête
+        translations = {
+            t.language: t.name
+            for t in obj.translations.all()
+        }
+
+        return translations.get(lang) or translations.get("fr")
 class ComposeIngredientSerializer(DynamicFieldsModelSerializer):
     # recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     # category = CategorySerializer()
@@ -996,6 +1020,7 @@ class DetailsBillsSerializer(DynamicFieldsModelSerializer):
 
     def get_options(self, obj):
         return DetailsBillsIngredientSerializer(obj.options.all(), many=True).data
+
 
 class DeliveryInfoSerializer(DynamicFieldsModelSerializer):
     bills = BillsSerializer(many=False, fields=('id', 'code', 'patient', 'doctor'))  # ou BillsMiniSerializer si tu as

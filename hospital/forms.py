@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import JSONField
 from django import forms
 from rest_framework import serializers
 
-from hospital.models import TYPE_ACTION, CateringInfo, DeliveryInfo, DetailsBillsIngredient, DetailsPatientAccount, DetailsStock_movement, Dish, EventInfo, Ingredient, PatientAccount,District, Insurance, Recipes, Stock_movement, Storage_depots, User, Hospital, Patient, \
+from hospital.models import TYPE_ACTION, CateringInfo, DeliveryInfo, DetailsBillsIngredient, DetailsPatientAccount, DetailsStock_movement, Dish, EventInfo, Ingredient, PatientAccount,District, Insurance, Recipes, Season, Stock_movement, Storage_depots, User, Hospital, Patient, \
     Cash, Expenses_nature, Cash_movement, Category, \
     Supplies, Suppliers, DetailsSupplies, DetailsBills,PatientSettlement, Inventory, DetailsInventory, \
     Region, City,  Type_patient
@@ -835,3 +835,15 @@ class EventInfoForm(forms.ModelForm):
             'contract_amount',
             'paid'
         )
+
+class SeasonForm(forms.ModelForm):
+    sync_version = forms.IntegerField(required=False)
+    type = forms.CharField(required=True)
+    start_date = forms.CharField(required=True)
+    end_date = forms.CharField(required=True)
+    name_language = forms.JSONField(required=False)
+    is_active = forms.BooleanField(initial=True, required=False)
+
+    class Meta:
+        model = Season
+        fields = '__all__'

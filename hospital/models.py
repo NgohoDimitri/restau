@@ -2013,6 +2013,33 @@ class StructureArticle(SyncBaseModel):
         unique_together=('hospital', 'dish')
         db_table = 'structure_article'
         ordering = ('-id',)
+
+class Season(SyncBaseModel):
+    SEASON_TYPES = (('RAINY', 'Reany season'),('DRY', 'Dry season'))
+    is_shared = models.BooleanField(default=False, null=True)  # Partagé entre structures
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, null=True)
+    type = models.CharField(max_length=255, blank=False, choices=SEASON_TYPES)
+    name_language = models.CharField(max_length=255, blank=False)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True)  # Partagé entre structures
+
+    class Meta:
+        db_table = 'season'
+        ordering = ('-id',)
+
+class SeasonTranslation(SyncBaseModel):
+    is_shared = models.BooleanField(default=False, null=True)  # Partagé entre structures
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, null=True)
+    season = models.ForeignKey(Season, related_name='translations', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    language = models.CharField(max_length=5)  # 'fr', 'en'
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'season_translation'
+        unique_together = ('season', 'language')
 # from track_actions import constants
 # class History(SyncBaseModel):
 #     """History model to store user actions"""
