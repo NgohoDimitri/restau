@@ -58,10 +58,12 @@ class CashForm(forms.ModelForm):
     is_active = forms.BooleanField(initial=True, required=False)
     cash_fund = forms.IntegerField(required=False)
     type_cash = forms.CharField(required=True)
+    difference = forms.IntegerField(required=False)
+    physical_amount = forms.IntegerField(required=False)
 
     class Meta:
         model = Cash
-        fields = ('sync_version','is_shared','hospital','code', 'cash_fund','type_cash', 'is_active', 'deleted')
+        fields = ('sync_version','is_shared','hospital','code','difference','physical_amount', 'cash_fund','type_cash', 'is_active', 'deleted')
 
 
 # class ModuleForm(forms.ModelForm):
@@ -136,10 +138,11 @@ class Cash_movementForm(forms.ModelForm):
     physical_amount = forms.IntegerField(required=False)
     type = forms.CharField(required=False)
     type_cash_movement = forms.CharField(required=False)
+    date_movement = forms.CharField(required=False)
 
     class Meta:
         model = Cash_movement
-        fields = ('sync_version','is_shared','difference','hospital','code', 'type','type_cash_movement', 'motive', 'physical_amount','amount_movement', 'expenses_nature', 'cash_origin', 'cash_destination')
+        fields = ('sync_version', 'is_shared', 'difference', 'hospital', 'date_movement','code', 'type','type_cash_movement', 'motive', 'physical_amount','amount_movement', 'expenses_nature', 'cash_origin', 'cash_destination')
 
 
 class PatientAccountForm(forms.ModelForm):
@@ -843,6 +846,7 @@ class SeasonForm(forms.ModelForm):
     end_date = forms.CharField(required=True)
     name_language = forms.JSONField(required=False)
     is_active = forms.BooleanField(initial=True, required=False)
+    hospital = forms.ModelChoiceField(required=False, queryset=Hospital.objects.all())
 
     class Meta:
         model = Season

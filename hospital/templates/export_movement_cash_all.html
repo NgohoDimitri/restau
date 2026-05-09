@@ -111,6 +111,7 @@
         {% if lang == 'fr' %}
     <tr>
         <th style="color: black">Code</th>
+        <th style="color: black">Cassier</th>
         <th style="color: black">Type</th>
         <th style="color: black">Motifs</th>
         <th style="color: black">Montant</th>
@@ -119,6 +120,7 @@
     {% else %}
             <tr>
         <th style="color: black">Code</th>
+        <th style="color: black">Casher</th>
         <th style="color: black">Type</th>
         <th style="color: black">Reason</th>
         <th style="color: black">Amount</th>
@@ -130,6 +132,7 @@
     {% for stock_movement in movements %}
         <tr style="text-align: center">
             <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ stock_movement.code }}</td>
+            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ stock_movement.cash.user.username }}</td>
             {% if stock_movement.type == 'EXIT' %}
             <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{% if lang == 'fr' %} SORTIE {% else %} EXIT {% endif %}</td>
             {% else %}

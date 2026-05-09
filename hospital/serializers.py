@@ -340,7 +340,7 @@ class DetailsPatientAccountSerializer(DynamicFieldsModelSerializer):
 class CategorySerializer(DynamicFieldsModelSerializer):
     # hospital = HospitalSerializer(many=False, fields=('id', 'name'))
     """
-    Bifrost medical_areas writable nested serializer
+    Bifrost category writable nested serializer
     """
     products_count = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
@@ -390,11 +390,23 @@ class CashSerializer(DynamicFieldsModelSerializer):
     """
     user = UserSerializer(many=False, fields=('id', 'username'))
     close_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    amount_exit = serializers.SerializerMethodField()
+    amount_entry = serializers.SerializerMethodField()
+    amount_bill = serializers.SerializerMethodField()
     
 
     class Meta:
         model = Cash
         fields = '__all__'
+
+    def get_amount_exit(self, obj):
+        return Cash_movement.objects.filter(cash_id=obj, type='EXIT', deleted=False).all().aggregate(Sum('amount_movement'))['amount_movement__sum'] or 0
+
+    def get_amount_entry(self, obj):
+        return Cash_movement.objects.filter(cash_id=obj, type='ENTRY',deleted=False).all().aggregate(Sum('amount_movement'))['amount_movement__sum'] or 0
+
+    def get_amount_bill(self, obj):
+        return Bills.objects.filter(cash_id=obj, deleted=False).all().aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
 
 
 class SuppliersSerializer(DynamicFieldsModelSerializer):

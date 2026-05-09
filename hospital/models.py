@@ -50,7 +50,8 @@ SYMPTOMS_CHOICES = [
     ('SECRETIONS', 'SECRETIONS')
 ]
 TYPE_MVT = [
-    ('ENTRY', 'Entry'), ('TRANSFER', 'Transfer'),
+    ('ENTRY', 'Entry'), 
+    ('TRANSFER', 'Transfer'),
     ('EXIT', 'Exit')
 ]
 status_occupation = [
@@ -241,7 +242,7 @@ def add_region():
             assign_missing_city_codes_bulk(model=Region, digit=6, prefix='RGN')
         
 def add_code(self, prefix, digit, model, hospital=None):
-    last = model.objects.exclude(code__isnull=True).exclude(code='').order_by('-id').first()
+    last = model.objects.exclude(code__isnull=True).exclude(code='').order_by('-code').first()
     last_code = last.code if last else None
 
     number = 1
@@ -694,6 +695,8 @@ class Cash(SyncBaseModel):
     cash_fund = models.IntegerField(default=0, null=True)
     balance = models.IntegerField(default=0)
     is_transfer = models.BooleanField(default=False)
+    physical_amount = models.IntegerField(default=0)
+    difference = models.IntegerField(default=0)
     type_cash = models.CharField(max_length=255, choices=TYPE_CASH, null=True, blank=True)
     is_active = models.BooleanField(default=True, db_column='is_active')
     open_date = models.DateTimeField(verbose_name="Open Date", auto_now_add=True, null=True, blank=True)
@@ -853,8 +856,6 @@ class Bills(SyncBaseModel):
     delivery_man = models.CharField(max_length=100, null=True, blank=True)
     # expected_duration  = models.IntegerField(default=0, null=True, blank=True)
     # expected_time = models.DateTimeField(null=True, blank=True)
-    bills_date = models.DateField(null=True, blank=True)
-
     event_name = models.CharField(max_length=150,null=True,)
     organizer = models.CharField(max_length=150,null=True,)
     location = models.TextField(null=True,)
@@ -2019,7 +2020,7 @@ class Season(SyncBaseModel):
     is_shared = models.BooleanField(default=False, null=True)  # Partagé entre structures
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, null=True)
     type = models.CharField(max_length=255, blank=False, choices=SEASON_TYPES)
-    name_language = models.CharField(max_length=255, blank=False)
+    name_language = models.JSONField(default=list, null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True, null=True)  # Partagé entre structures

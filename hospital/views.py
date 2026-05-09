@@ -1046,15 +1046,15 @@ class CashViewSet(viewsets.ModelViewSet):
             cash = Cash.objects.filter(user=user,is_active=True, type_cash='CASH_COUNTERS', deleted = False).last()
             if cash:
                 raise Exception("Session déjà ouverte")
-            get_cash = Cash.objects.filter(hospital=self.request.user.hospital, user_id=user.id, is_active=False, type_cash='CASH_COUNTERS', deleted=False).order_by('-id').last()
+            get_cash = Cash.objects.filter(hospital=self.request.user.hospital, user_id=user.id, is_active=False, type_cash='CASH_COUNTERS', deleted=False).order_by('-code').first()
             if user.check_password(request.data['password']):
                 if cash_form.is_valid():
                     cash = cash_form.save()
                     cash.hospital = self.request.user.hospital
                     cash.user_id = user.id
                     if get_cash:
-                        cash.balance = int(request.data['cash_fund']) + int(get_cash.balance) + int(get_cash.cash_fund)
-                        cash.cash_fund = int(request.data['cash_fund']) + int(get_cash.cash_fund)
+                        # cash.balance = int(request.data['cash_fund']) + int(get_cash.balance) + int(get_cash.cash_fund)
+                        cash.cash_fund = int(request.data['cash_fund']) + int(get_cash.cash_fund) + int(get_cash.balance)
                     else:
                         cash.balance = request.data['cash_fund']
                         cash.cash_fund = request.data['cash_fund']
@@ -1112,6 +1112,8 @@ class CashViewSet(viewsets.ModelViewSet):
         if get_user.check_password(request.data['password']):
             get_cash = Cash.objects.filter(id=request.data['id'], is_active=True, type_cash='CASH_COUNTERS', hospital=self.request.user.hospital, deleted = False).last()
             get_cash.close_date = timezone.now()
+            get_cash.physical_amount = request.data['physical_amount']
+            get_cash.difference = int(request.data['difference'])
             get_cash.is_active = False
             get_cash.save()
             return Response(status=status.HTTP_200_OK)
@@ -1191,10 +1193,10 @@ class CashViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='isOpen')
     def is_open(self, request, *args, **kwargs):
         user = self.request.user
-        get_cash = Cash.objects.filter(hospital=user.hospital,user_id=user.id, is_active=True, type_cash='CASH_COUNTERS', deleted=False).last()
+        get_cash = Cash.objects.filter(hospital=user.hospital,user_id=user.id, is_active=True, type_cash='CASH_COUNTERS', deleted=False).order_by('-code').first()
         if get_cash:
             serializer = CashSerializer(get_cash, many=False)
-            content = {'content': {'is_active': True, 'is_inventory': False, 'cash': serializer.data, 'exit': serializer.data, 'entry': serializer.data}}
+            content = {'content': {'is_active': True, 'is_inventory': False, 'cash': serializer.data}}
             return Response(data=content, status=status.HTTP_200_OK)
         else:
 
@@ -1540,6 +1542,7 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
                     # else:
                     cash_movement = cash_movement_form.save()
                     cash_movement.hospital = user.hospital
+                    cash_movement.createdAt = formatted_date(date_str=request.data['date_movement'])
                     get_cash_origin = Cash.objects.filter(id=request.data['cash_origin'], deleted = False).last()
                     if get_cash_origin.balance == 0 :
                         errors = {"transfer": ["Montant insuffisant pour la transfert."]}
@@ -1564,6 +1567,7 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
                         cash_movement = cash_movement_form.save()
                         cash_movement.hospital = self.request.user.hospital
                         cash_movement.cash_id = get_cash.id
+                        cash_movement.createdAt = formatted_date(date_str=request.data['date_movement'])
                         
                         if request.data['type'] == 'EXIT':
                             cash_movement.balance_before = get_cash.balance
@@ -1648,6 +1652,7 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
         if cash_movement_form.is_valid():
             cash_movement = cash_movement_form.save()
             cash_movement.hospital = user.hospital
+            cash_movement.createdAt = formatted_date(date_str=request.data['date_movement'])
             cash_movement.save()
             serializer = self.get_serializer(cash_movement, many=False)
             if 'print' in request.query_params:
@@ -1947,7 +1952,7 @@ class SeasonViewSet(viewsets.ModelViewSet):
         category_form = SeasonForm(request.data)
         if category_form.is_valid():
             obj = category_form.save()
-            # obj.hospital = self.request.user.hospital
+            obj.hospital = self.request.user.hospital
             obj.save()
             for translate in self.request.data['name_language']:
                 get_translate = SeasonTranslation.objects.filter(season_id=obj.id, language=translate['language'], deleted = False).last()
@@ -1967,6 +1972,7 @@ class SeasonViewSet(viewsets.ModelViewSet):
         category_form = SeasonForm(request.data, instance=category)
         if category_form.is_valid():
             obj = category_form.save()
+            obj.hospital = self.request.user.hospital
             obj.save()
             for translate in self.request.data['name_language']:
                 get_translate = SeasonTranslation.objects.filter(season_id=obj.id, language=translate['language'], deleted = False).last()
@@ -3943,6 +3949,7 @@ class BillViewSet(viewsets.ModelViewSet):
             if get_cash:
                 bills.cash_id = get_cash.id
                 bills.cash_code = get_cash.code
+                bills.createdAt = formatted_date(date_str=request.data['bills_date'])
                 bills.cashier_name = get_cash.user.username
                 bills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                 get_details_bills = DetailsBills.objects.filter(hospital = user.hospital,cash__user_id=request.data['cashier'],bills=bills, deleted=False)
