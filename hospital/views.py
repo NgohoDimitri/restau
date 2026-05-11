@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, time
 from xml.dom import ValidationErr
 import pandas as pd
 from django.db import transaction
@@ -4579,7 +4579,10 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_month_payment_method']
             enddate = request.data['end_date_month_payment_method']
-        stat_globale_other = {}
+        
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
+        
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -4600,6 +4603,7 @@ class BillViewSet(viewsets.ModelViewSet):
             total_om=Sum('amount_om'),
             total_prepaid=Sum('amount_prepaid'),
         )
+        
         response = {
             "CASH": bills_other["total_cash"] or 0,
             "BANK_CARD": bills_other["total_bank_card"] or 0,
@@ -4651,7 +4655,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_channel']
             enddate = request.data['end_date_channel']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         stat_globale_other = {}
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
@@ -4662,6 +4667,7 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
 
             bills_other = Bills.objects.filter(createdAt__range=[startdate, enddate], deleted=False).values(category=F('bill_type')).annotate(turnover=Sum('amount_paid'))
+        
         for bill in bills_other:
             stat_globale_other[bill['category']] = bill['turnover']
 
@@ -4711,7 +4717,8 @@ class BillViewSet(viewsets.ModelViewSet):
             
             startdate = request.data['start_date_month']
             enddate = request.data['end_date_month']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         # Filtrage de base
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
@@ -4783,7 +4790,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_month']
             enddate = request.data['end_date_month']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -4841,7 +4849,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = get_first_date_of_month(year=int(date_month.split("-")[0]), month=int(date_month.split("-")[1]))
             enddate = get_last_date_of_month(year=int(date_month.split("-")[0]), month=int(date_month.split("-")[1]))
-        
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -4916,7 +4925,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_month_first']
             enddate = request.data['end_date_month_first']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -4983,7 +4993,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_month_first']
             enddate = request.data['end_date_month_first']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -5114,7 +5125,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_month_entry']
             enddate = request.data['end_date_month_entry']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -5181,7 +5193,8 @@ class BillViewSet(viewsets.ModelViewSet):
             startdate = request.data['start_date_month_exit']
             enddate = request.data['end_date_month_exit']
 
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -5289,6 +5302,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = request.data['start_date_best_selling']
             enddate = request.data['end_date_best_selling']
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -5377,7 +5392,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = datetime.strptime(request.data['start_date'], "%Y-%m-%d").date()
             enddate = datetime.strptime(request.data['end_date'], "%Y-%m-%d").date()
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -5425,7 +5441,8 @@ class BillViewSet(viewsets.ModelViewSet):
             
             startdate = request.data['start_date']
             enddate = request.data['end_date']
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         last_day_of_prev_month = date.today().replace(day=1) - timedelta(days=1)
         previous_day = timezone.now() - timedelta(days=1)
         start_day_of_prev_month = date.today().replace(day=1) - timedelta(days=last_day_of_prev_month.day)
@@ -5793,7 +5810,8 @@ class BillViewSet(viewsets.ModelViewSet):
         else:
             startdate = get_first_date_of_month(year=int(date_month.split("-")[0]), month=int(date_month.split("-")[1]))
             enddate = get_last_date_of_month(year=int(date_month.split("-")[0]), month=int(date_month.split("-")[1]))
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         if 'hospital' in self.request.query_params:
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
@@ -5826,7 +5844,8 @@ class BillViewSet(viewsets.ModelViewSet):
         month = today.month
         startdate = get_first_date_of_month(year=year, month=month)
         enddate = get_last_date_of_month(year=year, month=month)
-
+        startdate = datetime.combine(datetime.strptime(startdate, "%Y-%m-%d").date(), time.min)
+        enddate = datetime.combine(datetime.strptime(enddate, "%Y-%m-%d").date(), time.max)
         last_day_of_prev_month = date.today().replace(day=1) - timedelta(days=1)
         previous_day = timezone.now() - timedelta(days=1)
         start_day_of_prev_month = date.today().replace(day=1) - timedelta(days=last_day_of_prev_month.day)
