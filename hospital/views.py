@@ -4674,10 +4674,17 @@ class BillViewSet(viewsets.ModelViewSet):
         final_other = stat_globale_other
         finalStat = []
         for k, v in final_other.items():
-            jsonElt = {}
-            jsonElt['category'] = k
-            jsonElt['turnover'] = v
-            finalStat.append(jsonElt)
+            if not k:
+                continue
+
+            finalStat.append({
+                "category": k,
+                "turnover": v
+            })
+            # jsonElt = {}
+            # jsonElt['category'] = k
+            # jsonElt['turnover'] = v
+            # finalStat.append(jsonElt)
         if self.request.query_params.get('type') == 'pdf':
             sum_total = sum(map(lambda x: int(x['turnover']), finalStat))
             html_render = get_template('export_stat_payment_method.html')
@@ -5018,7 +5025,6 @@ class BillViewSet(viewsets.ModelViewSet):
                 )
                 .order_by('hour', '-total_revenue')
             )
-            print('result', data)
             result = []
             labels_set = set()
             dish_set = set()
@@ -5052,7 +5058,6 @@ class BillViewSet(viewsets.ModelViewSet):
                 "labels": labels,
                 "datasets": datasets
             }
-            print('result', bills)
             # for hour, items in groupby(data, key=lambda x: x['hour']):
             #     top = max(items, key=lambda x: x['total_revenue'])
             #     result.append(top)
