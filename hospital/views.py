@@ -2721,7 +2721,6 @@ class SuppliesViewSet(viewsets.ModelViewSet):
 
             # supplies = supplies_form.save()
             # supplies.hospital = user.hospital
-            # supplies.timeAt = time.strftime("%H:%M:%S", time.localtime())
             # supplies.save()
             get_details_supplies = DetailsSupplies.objects.filter(hospital=user.hospital,
                 user_id=user.id, supplies=request.data['supplies']
@@ -2821,7 +2820,6 @@ class SuppliesViewSet(viewsets.ModelViewSet):
                 # return Response(data=serializer.data, status=status.HTTP_200_OK)
             # else:
             supplies = supplies_form.save()
-            supplies.timeAt = time.strftime("%H:%M:%S", time.localtime())
             supplies.hospital = user.hospital
             supplies.save()
             path = request.path
@@ -3043,7 +3041,6 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
                             
                         elif result == True and cummulative == False:
                             detailsBills.cash_id = get_cash.id
-                            detailsBills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                             detailsBills.save()
                             
                             # if int(get_price_dish.price) == int(request.data['pun']):
@@ -3177,7 +3174,6 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
                                 
 
                         detailsBills.cash_id = get_cash.id
-                        detailsBills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                         detailsBills.save()
                         if detailsBills.dish:
                             recipes = RecipeIngredient.objects.filter(dish_id = detailsBills.dish.id).filter(deleted=False)
@@ -3347,7 +3343,6 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
                                         
 
                                 detailsBills.cash_id = get_cash.id
-                                detailsBills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                                 detailsBills.save()
                                 if detailsBills.dish:
                                     recipes = RecipeIngredient.objects.filter(dish_id = detailsBills.dish.id).filter(deleted=False)
@@ -3428,7 +3423,6 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
                                     return Response(data=content, status=status.HTTP_201_CREATED)
                             elif result == True and cummulative == False:
                                 detailsBills.cash_id = get_cash.id
-                                detailsBills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                                 detailsBills.save()
                                 if detailsBills.dish:
                                     recipes = RecipeIngredient.objects.filter(dish_id = detailsBills.dish.id).filter(deleted=False)
@@ -3545,7 +3539,6 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
                                         
 
                                 detailsBills.cash_id = get_cash.id
-                                detailsBills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                                 detailsBills.save()
                                 if detailsBills.dish:
                                     recipes = RecipeIngredient.objects.filter(dish_id = detailsBills.dish.id).filter(deleted=False)
@@ -3957,7 +3950,6 @@ class BillViewSet(viewsets.ModelViewSet):
                 bills.cash_code = get_cash.code
                 bills.createdAt = formatted_date(date_str=request.data['bills_date'])
                 bills.cashier_name = get_cash.user.username
-                bills.timeAt = time.strftime("%H:%M:%S", time.localtime())
                 get_details_bills = DetailsBills.objects.filter(hospital = user.hospital,cash__user_id=request.data['cashier'],bills=bills, deleted=False)
                 for bill in get_details_bills:
                     added = DetailsBillsIngredient.objects.filter(hospital = user.hospital, details_bills_id = bill.id, deleted = False)
@@ -4217,7 +4209,6 @@ class BillViewSet(viewsets.ModelViewSet):
         #                 # bills.cash_id = get_cash.id
         #                 # bills.cash_code = get_cash.code
         #                 # bills.cashier_name = get_cash.user.username
-        #                 # bills.timeAt = time.strftime("%H:%M:%S", time.localtime())
         #                 # # get_details_bills = DetailsBills.objects.filter(cash__user_id=request.data['cashier'],
         #                 # #                                             bills=bills).filter(deleted=False)
         #                 # # for bill in get_details_bills:
@@ -6232,7 +6223,6 @@ class PatientSettlementViewSet(viewsets.ModelViewSet):
                 new_balance = get_bills1.aggregate(Sum('balance'))['balance__sum']
                 patient_settlement.new_balance = new_balance
                 # patient_settlement.bills_id = get_cash.id
-                patient_settlement.timeAt = time.strftime("%H:%M:%S", time.localtime())
                 patient_settlement.save()
                 if 'print' in request.query_params:
                     # get_details_bills = DetailsBills.objects.filter(cash__user_id=request.data['cashier'],
@@ -6284,7 +6274,6 @@ class PatientSettlementViewSet(viewsets.ModelViewSet):
         patient_settlement_form = PatientSettlementForm(request.data, instance=patient_settlement)
         if patient_settlement_form.is_valid():
             patient_settlement = patient_settlement_form.save()
-            patient_settlement.timeAt = time.strftime("%H:%M:%S", time.localtime())
             patient_settlement.save()
             if 'print' in request.query_params:
                 # get_details_bills = DetailsBills.objects.filter(cash__user_id=request.data['cashier'],
@@ -7857,7 +7846,6 @@ class DetailsStock_movementViewSet(viewsets.ModelViewSet):
                     detailsStock_movement.hospital_id = user.hospital.id
                     detailsStock_movement.stock_movement_id = request.data['stock_movement']
                     detailsStock_movement.user_id = user.id
-                    detailsStock_movement.timeAt = time.strftime("%H:%M:%S", time.localtime())
                     detailsStock_movement.save()
                     return Response(status=status.HTTP_201_CREATED)
                         
