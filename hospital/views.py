@@ -1211,7 +1211,7 @@ class CashViewSet(viewsets.ModelViewSet):
         #use select_related tojoin related tables in one query
         get_cash_movment = Cash_movement.objects.selected_related('cash').filter(cash_id=request.query_params.get("id")).filter(deleted=False)
 
-        serializer = Cash_movementSerializer(get_cash_movment, many=True, fields=('id', 'code', 'cash', 'motive','expenses_nature', 'type','amount_movement', 'createdAt', 'timeAt'))
+        serializer = Cash_movementSerializer(get_cash_movment, many=True, fields=('id', 'code', 'cash', 'motive','expenses_nature', 'type','amount_movement', 'createdAt'))
         get_settlement = PatientSettlement.objects.selected_related('cash').filter(cash_id=request.query_params.get("id"), deleted=False)
         serializer_settle = PatientSettlementSerializer(get_settlement, many=True)
         content = {'content': {'cash_movement': serializer.data,
@@ -1226,7 +1226,7 @@ class CashViewSet(viewsets.ModelViewSet):
         startdate = request.query_params.get("start_date")
         enddate = request.query_params.get("end_date")
         get_cash_movement = Cash_movement.objects.filter(createdAt__range=[startdate, enddate], deleted = False)
-        serializer = Cash_movementSerializer(get_cash_movement, many=True, fields=('id', 'code', 'cash', 'motive','expenses_nature', 'type','amount_movement', 'createdAt', 'timeAt'))
+        serializer = Cash_movementSerializer(get_cash_movement, many=True, fields=('id', 'code', 'cash', 'motive','expenses_nature', 'type','amount_movement', 'createdAt'))
         get_settlement = PatientSettlement.objects.filter(createdAt__range=[startdate, enddate], deleted=False)
         serializer_settle = PatientSettlementSerializer(get_settlement, many=True)
         content = {'content': {'cash_movement': serializer.data, 'settlement': serializer_settle.data}}
@@ -1701,7 +1701,7 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='specific')
     def specific(self, request, *args, **kwargs):
         queryset = Cash_movement.objects.filter(hospital=self.request.user.hospital, expenses_nature_id=self.request.query_params.get('expenses_nature')).filter(deleted=False)
-        serializer = self.get_serializer(queryset, many=True,fields=('id', 'code', 'cash', 'motive', 'amount_movement', 'createdAt', 'timeAt'))
+        serializer = self.get_serializer(queryset, many=True,fields=('id', 'code', 'cash', 'motive', 'amount_movement', 'createdAt'))
         return Response(data={'content':serializer.data}, status=status.HTTP_200_OK)    
     
     @action(detail=False, methods=['get'], url_path='all')
@@ -5926,7 +5926,7 @@ class BillViewSet(viewsets.ModelViewSet):
             sum_paid = queryset.aggregate(Sum('amount_paid'))['amount_paid__sum']
             sum_unpaid = queryset.aggregate(Sum('balance'))['balance__sum']
             serializer = BillsSerializerAnalysis(queryset, many=True, fields=(
-                'id', 'code', 'bill_type', 'createdAt', 'timeAt', 'patient', 'bills_amount','amount_received', 'cash',
+                'id', 'code', 'bill_type', 'createdAt', 'patient', 'bills_amount','amount_received', 'cash',
                 'balance', 'refund','amount_gross','amount_paid')).data
             content = {'content': serializer, 'sum_ca': sum_ca,'sum_ca': sum_ca, 'sum_paid': sum_paid, 'sum_unpaid': sum_unpaid}
             # else:
@@ -5940,7 +5940,7 @@ class BillViewSet(viewsets.ModelViewSet):
     def print(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).exclude(deleted=True)
         serializer = BillsSerializerAnalysis(queryset, many=True, fields=(
-                'id', 'code', 'bill_type', 'createdAt', 'timeAt', 'patient', 'type_patient', 'bills_amount','amount_received', 'cash',
+                'id', 'code', 'bill_type', 'createdAt', 'patient', 'type_patient', 'bills_amount','amount_received', 'cash',
                 'balance', 'refund','amount_gross','amount_paid','net_payable')).data
         sum_unpaid = queryset.aggregate(Sum('balance'))
         sum_paid = queryset.aggregate(Sum('amount_paid'))
@@ -6028,7 +6028,7 @@ class BillViewSet(viewsets.ModelViewSet):
         
         queryset = self.filter_queryset(self.get_queryset()).filter(cash__user_id=self.request.user.id, cash__is_active=True)
 
-        serializer = BillsSerializer(queryset, many=True, fields=('id', 'bills','deleted','cash', 'code', 'patient', 'patient_account', 'amount_received', 'amount_paid', 'phone_number', 'bills_date', 'bill_type', 'additional_info', 'refund', 'tva', 'bills_amount', 'balance', 'refund', 'createdAt', 'timeAt', 'bank_card_number', 'phone_number_momo', 'phone_number_om', 'amount_om', 'amount_momo', 'amount_prepaid','amount_bank_card', 'amount_cash')).data
+        serializer = BillsSerializer(queryset, many=True, fields=('id', 'bills','deleted','cash', 'code', 'patient', 'patient_account', 'amount_received', 'amount_paid', 'phone_number', 'bills_date', 'bill_type', 'additional_info', 'refund', 'tva', 'bills_amount', 'balance', 'refund', 'createdAt', 'bank_card_number', 'phone_number_momo', 'phone_number_om', 'amount_om', 'amount_momo', 'amount_prepaid','amount_bank_card', 'amount_cash')).data
         content = {'content': serializer}
         return Response(data=content, status=status.HTTP_200_OK)  
       
@@ -7159,9 +7159,6 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
                 else:
                     detailsSupplies.cmup = Decimal(unit_cost).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                 detailsSupplies.user_id = user.id
-                detailsSupplies.timeAt = time.strftime(
-                    "%H:%M:%S", time.localtime()
-                )
                 detailsSupplies.save()
                 get_supplies.supply_amount += detailsSupplies.total_amount
                 get_supplies.suppliers_id = request.data['suppliers']
@@ -7189,7 +7186,6 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
             get_bills.business_unit = request.data["business_unit"]
             get_bills.quantity = Decimal(request.data.get("quantity", 0))
             get_bills.quantity_two = request.data.get("quantity_two", 0)
-            get_bills.timeAt = timezone.now().time()
             get_bills.total_amount = Decimal(request.data["total_amount"])
             get_bills.unit_price = Decimal(request.data["total_amount"]) / Decimal(request.data["quantity"])
             get_bills.updatedAt = timezone.now()
@@ -7214,9 +7210,6 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
                 detailsSupplies.stock_initial = request.data["quantity"]
                 unit_cost = request.data["total_amount"] / request.data["quantity"]
                 detailsSupplies.unit_price = unit_cost
-                detailsSupplies.timeAt = time.strftime(
-                    "%H:%M:%S", time.localtime()
-                )
                 
 
                 get_stock = Stock.objects.filter(hospital=user.hospital, ingredient_id=detailsSupplies.ingredient_id,
@@ -7288,7 +7281,6 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
             get_bills.business_unit = request.data["business_unit"]
             get_bills.quantity = Decimal(request.data.get("quantity", 0))
             get_bills.quantity_two = request.data.get("quantity_two", 0)
-            get_bills.timeAt = timezone.now().time()
             get_bills.total_amount = Decimal(request.data["total_amount"])
             get_bills.unit_price = Decimal(request.data["total_amount"]) / Decimal(request.data["quantity"])
             get_bills.updatedAt = timezone.now()
