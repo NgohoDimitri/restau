@@ -2038,7 +2038,7 @@ class SeasonViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='all')
-    def get_all_exp(self, request, *args, **kwargs):
+    def get_all_season(self, request, *args, **kwargs):
         
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True, ).data
@@ -5912,8 +5912,8 @@ class BillViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='bills_analysis')
     def analysis_bills(self, request, *args, **kwargs):
         try:
-            start_date = self.request.query_params.get("start_date")
-            today = timezone.now()
+            # start_date = self.request.query_params.get("start_date")
+            # today = timezone.now()
             # if start_date:
             # year = start_date.split("-")[0]
             # month = start_date.split("-")[1]
