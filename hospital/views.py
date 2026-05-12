@@ -3907,12 +3907,18 @@ class BillViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
+        if "admin" in user.role.lower():
+            qs = (
+                Bills.objects
+                .select_related('hospital')   # très important
+            )
+        else:
 
-        qs = (
-            Bills.objects
-            .select_related('hospital')   # très important
-            .filter(cash__user_id=user.id, cash__is_active=True)
-        )
+            qs = (
+                Bills.objects
+                .select_related('hospital')   # très important
+                .filter(cash__user_id=user.id, cash__is_active=True)
+            )
 
         if user.hospital_id:
             qs = qs.filter(hospital_id=user.hospital_id)
