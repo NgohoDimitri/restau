@@ -748,6 +748,32 @@ class StockViewSet(viewsets.ModelViewSet):
         # content = {'content': {'solde_patient': get_bills}}
         return Response(data=content, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], url_path='lowstock')
+    def get_all_stock_lowstock(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()).exclude(ingredient__isnull=True).filter(
+                quantity__lte=F('ingredient__threshold_min')
+            )
+        serializer = self.get_serializer(queryset, many=True,
+                                         fields=('id', 'ingredient_name', 'ingredient_id', 'quantity', 'quantity_two')).data
+        content = {'content': serializer}
+        # patient_id = self.request.query_params.get("patient_id")
+        # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
+        # content = {'content': {'solde_patient': get_bills}}
+        return Response(data=content, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='overstock')
+    def get_all_stock_overstock(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()).exclude(ingredient__isnull=True).filter(
+            quantity__gte=F('ingredient__threshold_max')
+        )
+        serializer = self.get_serializer(queryset, many=True,
+                                         fields=('id', 'ingredient_name', 'ingredient_id', 'quantity', 'quantity_two')).data
+        content = {'content': serializer}
+        # patient_id = self.request.query_params.get("patient_id")
+        # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
+        # content = {'content': {'solde_patient': get_bills}}
+        return Response(data=content, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['get'], url_path='stock_available')
     def stock_availables(self, request):
         # queryset = self.filter_queryset(self.get_queryset())
@@ -3848,7 +3874,7 @@ class DetailsBillsViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='details')
     def get_details(self, request, *args, **kwargs):
         
-        queryset = self.filter_queryset(self.get_queryset()).select_related('dish').filter(hospital=self.request.user.hospital).values('dish__id','dish__name_language').annotate(
+        queryset = self.filter_queryset(self.get_queryset()).select_related('dish').exclude(bills__bills_amount=0).values('dish__id','dish__name_language').annotate(
             total_quantity=Sum('quantity_served'),
             total_pun=Sum('pun'),
             total_amount=Sum('amount_net'),
@@ -8952,6 +8978,7 @@ class DetailsBillsIngredientViewSet(viewsets.ModelViewSet):
         obj.deleted = True
         obj.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
     
 class MovementStockViewSet(viewsets.ModelViewSet):
     queryset = MovementStock.objects.all()

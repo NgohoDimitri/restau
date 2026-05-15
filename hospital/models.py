@@ -1002,6 +1002,8 @@ class Ingredient(SyncBaseModel):
     code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     name_language = models.JSONField(default=list, null=True, blank=True)
     unit = models.CharField(max_length=20, default="g")  # g, ml, pcs
+    threshold_min = models.IntegerField(default=0, null=True)
+    threshold_max = models.IntegerField(default=0, null=True,)
     cmup = models.FloatField(default=0.0, null=True, blank=True)
     price_per_unit = models.DecimalField(max_digits=12, decimal_places=1, default=0, null=True)  # prix par unité
     last_paid_price = models.DecimalField(max_digits=12, decimal_places=1, default=0, null=True)  # dernier prix d'achat

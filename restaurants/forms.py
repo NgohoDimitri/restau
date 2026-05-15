@@ -72,6 +72,8 @@ class PromotionForm(forms.ModelForm):
 
 class IngredientForm(forms.ModelForm):
     sync_version = forms.IntegerField(required=False)
+    threshold_min = forms.IntegerField(required=False)
+    threshold_max = forms.IntegerField(required=False)
     name_language = forms.JSONField(required=False)
     unit = forms.CharField(required=True)
     stock_quantity = forms.FloatField(required=False)
@@ -80,7 +82,7 @@ class IngredientForm(forms.ModelForm):
 
     class Meta:
         model = Ingredient
-        fields = ('sync_version','name_language', 'unit', 'stock_quantity', 'price_per_unit', 'is_delivery')
+        fields = ('sync_version','name_language','threshold_min','threshold_max', 'unit', 'stock_quantity', 'price_per_unit', 'is_delivery')
 
 class ComposeIngredientForm(forms.ModelForm):
     sync_version = forms.IntegerField(required=False)
