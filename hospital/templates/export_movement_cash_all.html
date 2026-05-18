@@ -129,25 +129,79 @@
             {% endif %}
     </thead>
     <tbody>
-    {% for stock_movement in movements %}
-        <tr style="text-align: center">
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ stock_movement.code }}</td>
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ stock_movement.cash.user.username }}</td>
-            {% if stock_movement.type == 'EXIT' %}
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{% if lang == 'fr' %} SORTIE {% else %} EXIT {% endif %}</td>
-            {% else %}
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{% if lang == 'fr' %} ENTREE {% else %} ENTRY {% endif %}</td>
-            {% endif %}
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;"><div style="font-family:Verdana, Geneva, sans-serif;text-align: justify; font-size:8px;" colspan="0"
-                             align="justify">
-                             {{ stock_movement.motive }}
-                             </div></td>
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ stock_movement.amount_movement }}</td>
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ stock_movement.createdAt }}</td>
+    {% for result in final_result %}
+
+        <!-- Header Nature -->
+        <tr>
+            <td colspan="6"
+                style="font-family:Verdana, Geneva, sans-serif;
+                       font-weight:700;
+                       font-size:14px;
+                       background:#f2f2f2;
+                       padding:8px;">
+                {{ result.nature_name }}
+            </td>
         </tr>
 
+        <!-- Total -->
+        <tr>
+            <td colspan="6"
+                style="font-family:Verdana, Geneva, sans-serif;
+                       font-weight:600;
+                       font-size:12px;
+                       padding:5px;">
+                Total : {{ result.total }}
+            </td>
+        </tr>
+
+        <!-- Movements -->
+        {% for stock_movement in result.movements %}
+
+        <tr style="text-align:center">
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ stock_movement.code }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ stock_movement.username }}
+            </td>
+
+            {% if stock_movement.type == 'EXIT' %}
+                <td class="td"
+                    style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                    {% if lang == 'fr' %} SORTIE {% else %} EXIT {% endif %}
+                </td>
+            {% else %}
+                <td class="td"
+                    style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                    {% if lang == 'fr' %} ENTREE {% else %} ENTRY {% endif %}
+                </td>
+            {% endif %}
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px; text-align:left;">
+                {{ stock_movement.motive }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ stock_movement.amount }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ stock_movement.createdAt }}
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
     {% endfor %}
-    </tbody>
+</tbody>
 </table>
 <br>
 <table>
@@ -196,11 +250,85 @@
     </tr>
             {% endif %}
     </thead>
-    <tbody>
+
+        <tbody>
+    {% for result in final_settlements %}
+
+        <!-- Header Nature -->
+        <tr>
+            <td colspan="7"
+                style="font-family:Verdana, Geneva, sans-serif;
+                       font-weight:700;
+                       font-size:14px;
+                       background:#f2f2f2;
+                       padding:8px;">
+                {{ result.bill_type }}
+            </td>
+        </tr>
+
+        <!-- Total -->
+        <tr>
+            <td colspan="7"
+                style="font-family:Verdana, Geneva, sans-serif;
+                       font-weight:600;
+                       font-size:12px;
+                       padding:5px;">
+                Total : {{ result.total_amount_paid }}
+            </td>
+        </tr>
+
+        <!-- Movements -->
+        {% for settlement in result.settlements %}
+
+        <tr style="text-align:center">
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ settlement.code }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ settlement.patient_name }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px; text-align:left;">
+                {{ settlement.amount_cash|intcomma }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ settlement.amount_om|intcomma }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px; text-align:left;">
+                {{ settlement.amount_momo|intcomma }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ settlement.amount_prepaid|intcomma }}
+            </td>
+
+            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">
+                {{ settlement.createdAt }}
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    {% endfor %}
+</tbody>
+
+    <!-- <tbody>
     {% for settlement in settlements %}
         <tr style="text-align: center">
             <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ settlement.code }}</td>
-            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ settlement.patient.name }}</td>
+            <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ settlement.patient_name }}</td>
             <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ settlement.amount_cash }}</td>
             <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ settlement.amount_om }}</td>
             <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{ settlement.amount_momo }}</td>
@@ -209,7 +337,7 @@
         </tr>
 
     {% endfor %}
-    </tbody>
+    </tbody> -->
 </table>
 </body>
 

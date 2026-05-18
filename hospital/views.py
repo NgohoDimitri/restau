@@ -1263,22 +1263,97 @@ class CashViewSet(viewsets.ModelViewSet):
         startdate = request.query_params.get("start_date")
         enddate = request.query_params.get("end_date")
         queryset_cash = Cash_movement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
-        serializer_cash = Cash_movementSerializer(queryset_cash, many=True)
-        queryset_settelment = PatientSettlement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
-        serializer_settlement = PatientSettlementSerializer(queryset_settelment, many=True)
+        queryset = (
+            Cash_movement.objects
+            .filter(
+                createdAt__range=[startdate, enddate],
+                deleted=False,
+                expenses_nature__isnull=False
+            )
+            .select_related('expenses_nature')
+            .order_by('expenses_nature__name', '-createdAt')
+        )
+
+        result = defaultdict(lambda: {
+            'nature_id': None,
+            'nature_name': '',
+            'total': 0,
+            'movements': []
+        })
+
+        for item in queryset:
+            key = item.expenses_nature.id
+
+            result[key]['nature_name'] = item.expenses_nature.name
+            result[key]['total'] += item.amount_movement
+
+            result[key]['movements'].append({
+                'id': item.id,
+                'code': item.code,
+                'type': item.type,
+                'username': item.cash.user.username if item.cash else '',
+                'type_cash_movement': item.type_cash_movement,
+                'amount': item.amount_movement,
+                'difference': item.difference,
+                'motive': item.motive,
+                'balance_before': item.balance_before,
+                'balance_after': item.balance_after,
+                'physical_amount': item.physical_amount,
+                'createdAt': item.createdAt,
+            })
+
+        final_result = list(result.values())
+        queryset_settlement = PatientSettlement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
+        queryset_settlement = (
+            PatientSettlement.objects
+            .filter(
+                createdAt__range=[startdate, enddate],
+                deleted=False,
+                bills__isnull=False
+            )
+            .select_related('patient', 'cash', 'bills')
+            .order_by('bills__bill_type', '-createdAt')
+        )
+
+        result_settlement = defaultdict(lambda: {
+            'bill_type': '',
+            'total_amount_paid': 0,
+            'settlements': []
+        })
+
+        for item in queryset_settlement:
+
+            bill_type = item.bills.bill_type if item.bills else 'UNKNOWN'
+
+            result_settlement[bill_type]['bill_type'] = bill_type
+            result_settlement[bill_type]['total_amount_paid'] += item.bills.amount_paid or 0
+
+            result_settlement[bill_type]['settlements'].append({
+                'id': item.id,
+                'code': item.code,
+                'patient_name': item.patient.name if item.patient else '',
+                'amount_paid': item.bills.amount_paid if item.bills else 0,
+                'amount_cash': item.amount_cash,
+                'amount_om': item.amount_om,
+                'amount_momo': item.amount_momo,
+                'amount_prepaid': item.amount_prepaid,
+                'createdAt': item.createdAt,
+            })
+
+        final_result_settlement = list(result_settlement.values())
         # if 'type' in self.request.query_params:
         #     queryset = self.filter_queryset(self.get_queryset()).filter(deleted=False).order_by('-createdAt')
         # else:
         #     queryset = self.filter_queryset(self.get_queryset()).filter(cash_id=get_cash.id).filter(deleted=False).order_by('-createdAt')
         sum_total_in = queryset_cash.filter(type='ENTRY').aggregate(Sum('amount_movement'))
         sum_total_out = queryset_cash.filter(type='EXIT').aggregate(Sum('amount_movement'))
-        sum_cash = queryset_settelment.aggregate(Sum('amount_cash'))
-        sum_om = queryset_settelment.aggregate(Sum('amount_om'))
-        sum_momo = queryset_settelment.aggregate(Sum('amount_momo'))
-        sum_prepaid = queryset_settelment.aggregate(Sum('amount_prepaid'))
+        sum_cash = queryset_settlement.aggregate(Sum('amount_cash'))
+        sum_om = queryset_settlement.aggregate(Sum('amount_om'))
+        sum_momo = queryset_settlement.aggregate(Sum('amount_momo'))
+        sum_prepaid = queryset_settlement.aggregate(Sum('amount_prepaid'))
         html_render = get_template('export_movement_cash_all.html')
         html_content = html_render.render(
-            {'movements': serializer_cash.data,'start_date': startdate,'end_date': enddate,'sum_cash': sum_cash['amount_cash__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'settlements': serializer_settlement.data, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
+            {'final_result': final_result,'start_date': startdate,'end_date': enddate,'sum_cash': sum_cash['amount_cash__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'final_settlements': final_result_settlement, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
         result = BytesIO()
         pdf = pisa.pisaDocument(BytesIO(html_content.encode("utf-16")), result,
                                     link_callback=link_callback)
