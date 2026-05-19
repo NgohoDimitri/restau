@@ -1054,10 +1054,65 @@ class MovementStockSerializer(DynamicFieldsModelSerializer):
     ingredient = IngredientSerializer(many=False, fields=('id', 'name'))
     compose_ingredient = ComposeIngredientSerializer(many=False, fields=('id', 'name'))
     hospital = HospitalSerializer(many=False, fields=('id', 'name'))
+    source_data = serializers.SerializerMethodField()
      
     class Meta:
         model = MovementStock
         fields = '__all__'
+
+    def get_source_data(self, obj):
+
+        if obj.source == 'SUPPLIE':
+
+            detail = DetailsSupplies.objects.filter(
+                supplies_id=obj.reference_id, ingredient_id=obj.ingredient
+            ).select_related(
+                'supplies',
+                'supplies__suppliers'
+            ).first()
+
+            if detail:
+                return {
+                    'type': 'SUPPLIE',
+                    'detail_supply_id': detail.id,
+                    'quantity': detail.quantity,
+                    'quantity_two': detail.quantity_two,
+                    'total_amount': detail.total_amount,
+                    'unit_price': detail.unit_price
+                }
+
+        elif obj.source == 'INVENTORY':
+            detail = DetailsInventory.objects.filter(
+                            inventory_id=obj.reference_id, ingredient_id=obj.ingredient
+                        ).select_related(
+                            'inventory'
+                        ).first()
+            inventory = Inventory.objects.filter(
+                id=obj.reference_id
+            ).first()
+
+            if detail:
+                return {
+                    'type': 'INVENTORY',
+                    'inventory_id': inventory.id,
+                    'quantity_adjusted': inventory.quantity_adjusted,
+                    'amount_adjusted': inventory.amount_adjusted,
+                }
+
+        # elif obj.source == 'BILL':
+
+        #     detail_bill = DetailsBills.objects.filter(bills_id=obj.reference_id, ingredient_id=obj.ingredient).select_related('bills','cash').first()
+
+        #     if detail_bill:
+        #         return {
+        #             'type': 'BILL',
+        #             'detail_bill_id': detail_bill.id,
+        #             'quantity_served': detail_bill.quantity_served,
+        #             'pun': detail_bill.pun,
+        #             'amount_net': detail_bill.amount_net,
+        #         }
+
+        return None
 
 
 class PromotionRuleSerializer(DynamicFieldsModelSerializer):
