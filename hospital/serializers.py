@@ -923,6 +923,7 @@ class StockSerializer(DynamicFieldsModelSerializer):
     """
     # ingredient = IngredientSerializer(many=False, fields=('id', 'code', 'name', 'price_per_unit'))
     ingredient_name = serializers.SerializerMethodField()
+    ingredient_code = serializers.SerializerMethodField()
     ingredient_id = serializers.SerializerMethodField()
     compose_ingredient = ComposeIngredientSerializer(many=False, fields=('id', 'name'))
     storage_depots = Storage_depotsSerializer(many=False, fields=('id', 'name'))
@@ -931,7 +932,14 @@ class StockSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Stock
         fields = '__all__'
-
+    def get_ingredient_code(self, obj):
+        serializer = IngredientSerializer(
+            obj.ingredient,
+            context=self.context,
+            fields=('code',)
+        )
+        return serializer.data.get('code') if obj.ingredient else None
+    
     def get_ingredient_name(self, obj):
         serializer = IngredientSerializer(
             obj.ingredient,

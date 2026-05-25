@@ -741,7 +741,7 @@ class StockViewSet(viewsets.ModelViewSet):
     def get_all_stock_specify(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).exclude(ingredient__isnull=True)
         serializer = self.get_serializer(queryset, many=True,
-                                         fields=('id', 'ingredient_name', 'ingredient_id', 'quantity', 'quantity_two')).data
+                                         fields=('id', 'ingredient_code','ingredient_name', 'ingredient_id', 'quantity', 'quantity_two')).data
         content = {'content': serializer}
         # patient_id = self.request.query_params.get("patient_id")
         # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
