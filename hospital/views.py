@@ -15,6 +15,7 @@ from xhtml2pdf import pisa
 from decimal import Decimal
 from django.template.loader import get_template
 from django.http import HttpResponse
+from hospital.ai_assistant import ask_assistant
 # Create your views here.
 from hospital.forms import DetailsBillsIngredientForm, DetailsInventoryForm, DetailsPatientAccountForm, DetailsStock_movementForm, HospitalFormRule, PatientAccountForm, CateringInfoForm, EventInfoForm,DeliveryInfoForm, CityForm, DistrictForm, InsuranceForm, RegionForm, SeasonForm, Stock_movementForm, Storage_depotsForm, Type_patientForm, UserForm, UserFormUpdate, HospitalForm, \
     PatientForm, Expenses_natureForm, \
@@ -719,7 +720,7 @@ class StockViewSet(viewsets.ModelViewSet):
                 else:
                     # logo = settings.MEDIA_ROOT + '/logo2.png'
                     html_content = html_render.render(
-                        {'products': queryset_expired, 'export': 'date',
+                        {'export': 'date',
                             'hospital': get_hospital})
                 result = BytesIO()
                 pdf = pisa.pisaDocument(BytesIO(html_content.encode("ISO-8859-1")), result,
@@ -1303,54 +1304,93 @@ class CashViewSet(viewsets.ModelViewSet):
             })
 
         final_result = list(result.values())
-        queryset_settlement = PatientSettlement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
-        queryset_settlement = (
-            PatientSettlement.objects
+        # queryset_settlement = PatientSettlement.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
+        # queryset_settlement = (
+        #     PatientSettlement.objects
+        #     .filter(
+        #         createdAt__range=[startdate, enddate],
+        #         deleted=False,
+        #         bills__isnull=False
+        #     )
+        #     .select_related('patient', 'cash', 'bills')
+        #     .order_by('bills__bill_type', '-createdAt')
+        # )
+
+        # result_settlement = defaultdict(lambda: {
+        #     'bill_type': '',
+        #     'total_amount_paid': 0,
+        #     'settlements': []
+        # })
+
+        # for item in queryset_settlement:
+
+        #     bill_type = item.bills.bill_type if item.bills else 'UNKNOWN'
+
+        #     result_settlement[bill_type]['bill_type'] = bill_type
+        #     result_settlement[bill_type]['total_amount_paid'] += item.bills.amount_paid or 0
+
+        #     result_settlement[bill_type]['settlements'].append({
+        #         'id': item.id,
+        #         'code': item.code,
+        #         'patient_name': item.patient.name if item.patient else '',
+        #         'amount_paid': item.bills.amount_paid if item.bills else 0,
+        #         'amount_cash': item.amount_cash,
+        #         'amount_om': item.amount_om,
+        #         'amount_momo': item.amount_momo,
+        #         'amount_prepaid': item.amount_prepaid,
+        #         'createdAt': item.createdAt,
+        #     })
+
+        # final_result_settlement = list(result_settlement.values())
+
+        queryset_bills = Bills.objects.filter(createdAt__range=[startdate, enddate], deleted = False).order_by('-createdAt')
+        queryset_bills = (
+            Bills.objects
             .filter(
                 createdAt__range=[startdate, enddate],
                 deleted=False,
-                bills__isnull=False
             )
-            .select_related('patient', 'cash', 'bills')
-            .order_by('bills__bill_type', '-createdAt')
+            .select_related('patient', 'cash')
+            .order_by('district__name', '-createdAt')
         )
 
-        result_settlement = defaultdict(lambda: {
-            'bill_type': '',
+        result_bills = defaultdict(lambda: {
+            'location': '',
             'total_amount_paid': 0,
-            'settlements': []
+            'bills': []
         })
 
-        for item in queryset_settlement:
+        for item in queryset_bills:
 
-            bill_type = item.bills.bill_type if item.bills else 'UNKNOWN'
+            location = item.district.name if item.district else 'UNKNOWN'
 
-            result_settlement[bill_type]['bill_type'] = bill_type
-            result_settlement[bill_type]['total_amount_paid'] += item.bills.amount_paid or 0
+            result_bills[location]['location'] = location
+            result_bills[location]['total_amount_paid'] += item.amount_paid or 0
 
-            result_settlement[bill_type]['settlements'].append({
+            result_bills[location]['bills'].append({
                 'id': item.id,
                 'code': item.code,
                 'patient_name': item.patient.name if item.patient else '',
-                'amount_paid': item.bills.amount_paid if item.bills else 0,
+                'amount_paid': item.amount_paid,
                 'amount_cash': item.amount_cash,
                 'amount_om': item.amount_om,
                 'amount_momo': item.amount_momo,
                 'amount_prepaid': item.amount_prepaid,
+                'refund': item.refund,
                 'createdAt': item.createdAt,
             })
 
-        final_result_settlement = list(result_settlement.values())
+        final_result_settlement = list(result_bills.values())
         # if 'type' in self.request.query_params:
         #     queryset = self.filter_queryset(self.get_queryset()).filter(deleted=False).order_by('-createdAt')
         # else:
         #     queryset = self.filter_queryset(self.get_queryset()).filter(cash_id=get_cash.id).filter(deleted=False).order_by('-createdAt')
         sum_total_in = queryset_cash.filter(type='ENTRY').aggregate(Sum('amount_movement'))
         sum_total_out = queryset_cash.filter(type='EXIT').aggregate(Sum('amount_movement'))
-        sum_cash = queryset_settlement.aggregate(Sum('amount_cash'))
-        sum_om = queryset_settlement.aggregate(Sum('amount_om'))
-        sum_momo = queryset_settlement.aggregate(Sum('amount_momo'))
-        sum_prepaid = queryset_settlement.aggregate(Sum('amount_prepaid'))
+        sum_cash = queryset_bills.aggregate(Sum('amount_cash'))
+        sum_om = queryset_bills.aggregate(Sum('amount_om'))
+        sum_momo = queryset_bills.aggregate(Sum('amount_momo'))
+        sum_prepaid = queryset_bills.aggregate(Sum('amount_prepaid'))
         html_render = get_template('export_movement_cash_all.html')
         html_content = html_render.render(
             {'final_result': final_result,'start_date': startdate,'end_date': enddate,'sum_cash': sum_cash['amount_cash__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'final_settlements': final_result_settlement, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
@@ -4468,6 +4508,36 @@ class BillViewSet(viewsets.ModelViewSet):
         # get_bills = Bills.objects.filter(patient_id=patient_id).aggregate(Sum('balance'))['balance__sum']
         # content = {'content': {'solde_patient': get_bills}}
         return Response(data=content, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path='assistant')
+    def assistant_ai(self, request, *args, **kwargs):
+        
+        question = request.data.get("question", "").strip()
+
+        if not question:
+            return Response(
+                {"error": "Veuillez poser une question."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if len(question) > 500:
+            return Response(
+                {"error": "Question trop longue (max 500 caractères)."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            reponse = ask_assistant(question)
+            return Response({
+                "question": question,
+                "reponse": reponse,
+                "status": "success"
+            })
+        except Exception as e:
+            return Response(
+                {"error": f"Erreur assistant : {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     @action(detail=True, methods=['DELETE'], url_path='delete-empty')
     def delete_empty(self, request, pk=None):
         bills = self.get_object()

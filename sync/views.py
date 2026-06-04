@@ -312,6 +312,7 @@ class SyncViewSet(viewsets.ViewSet):
                 results["failed"] += 1
 
         return Response({"message": "Batch upload terminé", "results": results}, status=201)
+    
     @action(detail=False, methods=['post'], url_path='download/(?P<hospital_id>[^/.]+)')
     def download(self, request, hospital_id=None):
         force = request.data.get('force', False)

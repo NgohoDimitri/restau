@@ -108,6 +108,8 @@ TEMPLATES = [
     },
 ]
 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
 WSGI_APPLICATION = 'GH.wsgi.application'
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -116,11 +118,11 @@ import dj_database_url
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'yummy',
+#         'NAME': 'restaurants',
 #         'USER': 'postgres',
 #         'PASSWORD': 'postgres',
 #         'HOST': '127.0.0.1',
-#         'PORT': env('DB_PORT_2')
+#         'PORT': env('DB_PORT')
 #     }
 # }
 SYNC_SECRET_KEY = os.environ.get("SYNC_SECRET_KEY")
