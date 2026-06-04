@@ -15,7 +15,7 @@ from xhtml2pdf import pisa
 from decimal import Decimal
 from django.template.loader import get_template
 from django.http import HttpResponse
-from hospital.ai_assistant import ask_assistant
+# from hospital.ai_assistant import ask_assistant
 # Create your views here.
 from hospital.forms import DetailsBillsIngredientForm, DetailsInventoryForm, DetailsPatientAccountForm, DetailsStock_movementForm, HospitalFormRule, PatientAccountForm, CateringInfoForm, EventInfoForm,DeliveryInfoForm, CityForm, DistrictForm, InsuranceForm, RegionForm, SeasonForm, Stock_movementForm, Storage_depotsForm, Type_patientForm, UserForm, UserFormUpdate, HospitalForm, \
     PatientForm, Expenses_natureForm, \
@@ -4509,35 +4509,35 @@ class BillViewSet(viewsets.ModelViewSet):
         # content = {'content': {'solde_patient': get_bills}}
         return Response(data=content, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path='assistant')
-    def assistant_ai(self, request, *args, **kwargs):
+    # @action(detail=False, methods=['POST'], url_path='assistant')
+    # def assistant_ai(self, request, *args, **kwargs):
         
-        question = request.data.get("question", "").strip()
+    #     question = request.data.get("question", "").strip()
 
-        if not question:
-            return Response(
-                {"error": "Veuillez poser une question."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    #     if not question:
+    #         return Response(
+    #             {"error": "Veuillez poser une question."},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
 
-        if len(question) > 500:
-            return Response(
-                {"error": "Question trop longue (max 500 caractères)."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    #     if len(question) > 500:
+    #         return Response(
+    #             {"error": "Question trop longue (max 500 caractères)."},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
 
-        try:
-            reponse = ask_assistant(question)
-            return Response({
-                "question": question,
-                "reponse": reponse,
-                "status": "success"
-            })
-        except Exception as e:
-            return Response(
-                {"error": f"Erreur assistant : {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+    #     try:
+    #         reponse = ask_assistant(question)
+    #         return Response({
+    #             "question": question,
+    #             "reponse": reponse,
+    #             "status": "success"
+    #         })
+    #     except Exception as e:
+    #         return Response(
+    #             {"error": f"Erreur assistant : {str(e)}"},
+    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )
     @action(detail=True, methods=['DELETE'], url_path='delete-empty')
     def delete_empty(self, request, pk=None):
         bills = self.get_object()
