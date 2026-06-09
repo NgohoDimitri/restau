@@ -35,7 +35,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-runserver.default_port = '8016'
+runserver.default_port = '8017'
 runserver.default_addr = '127.0.0.1'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'drf_spectacular',
     'mathfilters',
+    'django_extensions',
     'django_celery_beat',
     'hospital.apps.HospitalConfig',
     'restaurants.apps.RestaurantsConfig',
@@ -119,12 +120,31 @@ import dj_database_url
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'restaurants',
-#         'USER': 'postgres',
+#         'USER': 'postgres','HOST': 'host.docker.internal',
 #         'PASSWORD': 'postgres',
 #         'HOST': '127.0.0.1',
 #         'PORT': env('DB_PORT')
 #     }
 # }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'restaurants',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': '127.0.0.1',
+#         'PORT': env('DB_PORT'),
+#         'OPTIONS': {
+#             "options": "-c statement_timeout=10000"   # 10s max par requête SQL
+#         }
+#     }
+# }
+
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# USE_X_FORWARDED_HOST = True
+
+# SECURE_SSL_REDIRECT = True
 SYNC_SECRET_KEY = os.environ.get("SYNC_SECRET_KEY")
 DATABASES = {
     "default": dj_database_url.config(

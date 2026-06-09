@@ -15,7 +15,6 @@ from xhtml2pdf import pisa
 from decimal import Decimal
 from django.template.loader import get_template
 from django.http import HttpResponse
-# from hospital.ai_assistant import ask_assistant
 # Create your views here.
 from hospital.forms import DetailsBillsIngredientForm, DetailsInventoryForm, DetailsPatientAccountForm, DetailsStock_movementForm, HospitalFormRule, PatientAccountForm, CateringInfoForm, EventInfoForm,DeliveryInfoForm, CityForm, DistrictForm, InsuranceForm, RegionForm, SeasonForm, Stock_movementForm, Storage_depotsForm, Type_patientForm, UserForm, UserFormUpdate, HospitalForm, \
     PatientForm, Expenses_natureForm, \
@@ -1388,12 +1387,14 @@ class CashViewSet(viewsets.ModelViewSet):
         sum_total_in = queryset_cash.filter(type='ENTRY').aggregate(Sum('amount_movement'))
         sum_total_out = queryset_cash.filter(type='EXIT').aggregate(Sum('amount_movement'))
         sum_cash = queryset_bills.aggregate(Sum('amount_cash'))
+        sum_paid = queryset_bills.aggregate(Sum('amount_paid'))
+        sum_refund = queryset_bills.aggregate(Sum('refund'))
         sum_om = queryset_bills.aggregate(Sum('amount_om'))
         sum_momo = queryset_bills.aggregate(Sum('amount_momo'))
         sum_prepaid = queryset_bills.aggregate(Sum('amount_prepaid'))
         html_render = get_template('export_movement_cash_all.html')
         html_content = html_render.render(
-            {'final_result': final_result,'start_date': startdate,'end_date': enddate,'sum_cash': sum_cash['amount_cash__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'final_settlements': final_result_settlement, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
+            {'final_result': final_result,'start_date': startdate,'end_date': enddate,'sum_cash': sum_cash['amount_cash__sum'],'sum_paid': sum_paid['amount_paid__sum'],'sum_refund': sum_refund['refund__sum'],'sum_om': sum_om['amount_om__sum'],'sum_momo': sum_momo['amount_momo__sum'],'sum_prepaid': sum_prepaid['amount_prepaid__sum'],'final_settlements': final_result_settlement, 'hospital': self.request.user.hospital, 'sum_total_in': sum_total_in['amount_movement__sum'], 'sum_total_out': sum_total_out['amount_movement__sum'], 'lang' : self.request.LANGUAGE_CODE})
         result = BytesIO()
         pdf = pisa.pisaDocument(BytesIO(html_content.encode("utf-16")), result,
                                     link_callback=link_callback)
@@ -4509,35 +4510,7 @@ class BillViewSet(viewsets.ModelViewSet):
         # content = {'content': {'solde_patient': get_bills}}
         return Response(data=content, status=status.HTTP_200_OK)
 
-    # @action(detail=False, methods=['POST'], url_path='assistant')
-    # def assistant_ai(self, request, *args, **kwargs):
-        
-    #     question = request.data.get("question", "").strip()
-
-    #     if not question:
-    #         return Response(
-    #             {"error": "Veuillez poser une question."},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-
-    #     if len(question) > 500:
-    #         return Response(
-    #             {"error": "Question trop longue (max 500 caractères)."},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-
-    #     try:
-    #         reponse = ask_assistant(question)
-    #         return Response({
-    #             "question": question,
-    #             "reponse": reponse,
-    #             "status": "success"
-    #         })
-    #     except Exception as e:
-    #         return Response(
-    #             {"error": f"Erreur assistant : {str(e)}"},
-    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
-    #         )
+ 
     @action(detail=True, methods=['DELETE'], url_path='delete-empty')
     def delete_empty(self, request, pk=None):
         bills = self.get_object()
@@ -5106,6 +5079,7 @@ class BillViewSet(viewsets.ModelViewSet):
             user_hospital = Hospital.objects.filter(id=self.request.query_params.get("hospital"), deleted = False).last()
         else:
             user_hospital = self.request.user.hospital
+        print(startdate)
         if user_hospital:
             bills = Bills.objects.filter(hospital=user_hospital,createdAt__range=[startdate, enddate], deleted=False).annotate(
                 days=TruncDate('createdAt')
@@ -5486,7 +5460,7 @@ class BillViewSet(viewsets.ModelViewSet):
             bills = DetailsBills.objects.filter(
                 hospital=hospital,
                 createdAt__range=[startdate, enddate],
-                deleted=False
+                deleted=False, bills__deleted=False
             ).exclude(dish_id=None).values(
                 'dish__id',
                 'dish__name_language',
@@ -5502,7 +5476,7 @@ class BillViewSet(viewsets.ModelViewSet):
 
             bills = DetailsBills.objects.filter(
                 createdAt__range=[startdate, enddate],
-                deleted=False
+                deleted=False, bills__deleted=False
             ).exclude(dish_id=None).values(
                 'dish__id',
                 'dish__name_language',
@@ -6092,14 +6066,14 @@ class BillViewSet(viewsets.ModelViewSet):
             # year_today = today.year
             # month_today = today.month
             # if int(year) == int(year_today) and int(month) == int(month_today):
-            queryset = self.filter_queryset(self.get_queryset()).exclude( cash__isnull=True)
+            queryset = self.filter_queryset(self.get_queryset()).exclude( cash__isnull=True).filter(deleted = False).order_by('-createdAt')
             sum_ca = queryset.aggregate(Sum('bills_amount'))['bills_amount__sum']
             sum_paid = queryset.aggregate(Sum('amount_paid'))['amount_paid__sum']
             sum_unpaid = queryset.aggregate(Sum('balance'))['balance__sum']
             serializer = BillsSerializerAnalysis(queryset, many=True, fields=(
                 'id', 'code', 'bill_type', 'createdAt', 'patient', 'bills_amount','amount_received', 'cash',
                 'balance', 'refund','amount_gross','amount_paid')).data
-            content = {'content': serializer, 'sum_ca': sum_ca,'sum_ca': sum_ca, 'sum_paid': sum_paid, 'sum_unpaid': sum_unpaid}
+            content = {'content': serializer, 'sum_ca': sum_ca,'sum_paid': sum_paid, 'sum_unpaid': sum_unpaid}
             # else:
                 # content = get_archive(year, month, self.request.query_params)
             return Response(data=content, status=status.HTTP_200_OK)
@@ -7820,6 +7794,7 @@ class LoginView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 from django.core.handlers import exception
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def user_logout(request):

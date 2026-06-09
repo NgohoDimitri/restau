@@ -1,0 +1,12 @@
+venv/
+venv2/
+Dockerfile
+docker-compose.yml
+fix_sequences
+k/
+static9/
+static5/
+log/
+.git/
+.vscode/
+.env

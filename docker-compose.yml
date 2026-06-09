@@ -1,0 +1,49 @@
+name: restiq
+
+services:
+
+  app:
+   build:
+    context: .
+    dockerfile: dockerfile
+   image: restiq-image
+   container_name: restiq-container
+   ports:
+    - "8000:8000"
+   volumes:
+    - .:/app
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - app
+  #  depends_on:
+  #   - db
+
+#   db:
+#    image: postgres:18.3
+#    healthcheck:
+#     test: ["CMD-SHELL", "pg_isready -U postgres"]
+#     interval: 5s
+#     timeout: 5s
+#     retries: 10
+#    container_name: postgres-db
+#    restart: always
+#    environment:
+#     POSTGRES_USER: postgres
+#     POSTGRES_PASSWORD: postgres
+#     POSTGRES_DB: restaurants
+#    volumes:
+#     - postgres_data:/var/lib/postgresql/data
+#    ports:
+#     - "5432:5432"
+
+# volumes:
+#  postgres_data:

@@ -216,6 +216,15 @@
 </table>
 <table class="table">
     <tr>
+        
+            <td style="font-family:Verdana, Geneva, sans-serif; font-weight:400; font-size:12px;" 
+            align="left">{% if lang == 'fr' %}TOTAL PAYE {% else %} TOTAL PAID {% endif %}: {{ sum_paid|intcomma }}</td>
+            <td style="font-family:Verdana, Geneva, sans-serif; font-weight:400; font-size:12px;" 
+            align="left">{% if lang == 'fr' %}TOTAL REMBOURSSEMENT{% else %} TOTAL REFUND {% endif %}: {{ sum_refund|intcomma }}</td>
+    </tr>
+</table>
+    <table class="table">
+    <tr>
         <td style="font-family:Verdana, Geneva, sans-serif; font-weight:400; font-size:12px;" 
             align="left">{% if lang == 'fr' %}TOTAL ESPECE {% else %} TOTAL CASH {% endif %}: {{ sum_cash|intcomma }}</td>
             <td style="font-family:Verdana, Geneva, sans-serif; font-weight:400; font-size:12px;" 
