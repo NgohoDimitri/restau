@@ -320,7 +320,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         user = self.get_object()
-        user_form = UserFormUpdate(request.data, instance=user)
+        user_form = UserForm(request.data, instance=user)
         if user_form.is_valid():
             user = user_form.save()
             user.groups.clear()

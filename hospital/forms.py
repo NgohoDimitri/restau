@@ -32,6 +32,8 @@ SYMPTOMS_CHOICES = [
 ]
 
 
+import re
+
 class UserForm(forms.ModelForm):
     sync_version = forms.IntegerField(required=False)
     is_shared = forms.BooleanField(initial=False, required=False)  # Partagé entre structures
@@ -43,11 +45,51 @@ class UserForm(forms.ModelForm):
     role = forms.CharField(required=False)
     type = forms.CharField(required=False)
     patient = forms.ModelChoiceField(required=False, queryset=Patient.objects.all())
-    password = forms.CharField(required=True, widget=forms.PasswordInput, min_length=5, max_length=255)
+    password = forms.CharField(required=False, widget=forms.PasswordInput, min_length=8, max_length=255)
 
     class Meta:
         model = User
         fields = ('sync_version','is_shared','hospital','username', 'role', 'is_active','type', 'password', 'patient', 'deleted', 'code')
+
+    def clean_password(self):
+        password = self.cleaned_data.get("password")
+
+        # si update sans password → OK
+        if not password:
+            return password
+
+        if len(password) < 8:
+            raise forms.ValidationError("8 caractères minimum")
+
+        if not re.search(r"[a-z]", password):
+            raise forms.ValidationError("Au moins une minuscule")
+
+        if not re.search(r"[A-Z]", password):
+            raise forms.ValidationError("Au moins une majuscule")
+
+        if not re.search(r"\d", password):
+            raise forms.ValidationError("Au moins un chiffre")
+
+        if not re.search(r"[!@#$%^&*()_+=-]", password):
+            raise forms.ValidationError("Au moins un caractère spécial")
+
+        return password
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        user.is_active = self.cleaned_data.get("is_active", False)
+
+        password = self.cleaned_data.get("password")
+
+        # UPDATE SAFE
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+
+        return user
 
 
 class CashForm(forms.ModelForm):
