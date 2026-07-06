@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="en">
+{% load humanize %}
+{% load static %}
+<head>
+    <style type="text/css">
+        @page {
+            size: a4;
+            margin: 1cm;
+        }
+
+        .table {
+            border: 0.5px solid #ababab;
+            text-align: center;
+            table-layout: fixed;
+            margin-bottom: 5px;
+        }
+
+        .table tr td {
+            white-space: nowrap;
+        }
+
+        .table th {
+            padding: 5px;
+            vertical-align: top;
+            background-color: #e8e8e8;
+        }
+
+        .table td {
+            padding: 5px;
+            vertical-align: top;
+            -pdf-keep-with-next: false;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+
+        }
+    </style>
+</head>
+
+<body>
+<table>
+
+    <div class="ui segment itemscard">
+        <div class="content">
+          <table >
+          
+            <tbody>
+              <tr>
+                <td class="text-left" align="center" style="font-family:Verdana, Geneva, sans-serif; font-weight:900; font-size:20px;color: black" width="170">
+                  <img id="logo" style="border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 5px;
+          width: 120px;" src="/media/logo2.png">
+                </td>
+                <td class="text-left" align="center" style="font-family:Verdana, Geneva, sans-serif; font-weight:500; font-size:18px">
+                </td>
+                <td class="text-left" align="center" style="font-family:Verdana, Geneva, sans-serif; font-weight:700; font-size:18px;color: black">
+                </td>
+                <td class="text-left" align="center" style="font-family:Verdana, Geneva, sans-serif; font-weight:500; font-size:18px;color: black">
+                </td>
+                <td class="text-left" align="center" style="font-family:Verdana, Geneva, sans-serif; font-weight:700; font-size:18px;color: black">
+                </td>
+                <td class="text-left" align="center" style="font-family:Verdana, Geneva, sans-serif; font-weight:300; font-size:18px;color: black" width="300">
+                  <div><span class="mono">{{ hospital.name }}</span></div>
+                  <div><span class="mono">{{ hospital.address }}</span></div>
+                  <div><span class="mono">Tel: {{ hospital.phone }}</span></div>
+                  <div><span class="mono">Email: {{ hospital.email }}</span></div>
+                </td>
+                
+              </tr>
+            </tbody>
+          </table>
+      
+        </div>
+      </div>
+      <br>
+    
+</table>
+
+    <br>
+<table>
+<tr>
+    {% if lang == 'fr' %}
+    <td style="font-family:Verdana, Geneva, sans-serif; font-weight:600; font-size:13px;" align="center" colspan="2">INVENTAIRE: {{inventory.code}}</td>
+  {% else %}
+    <td style="font-family:Verdana, Geneva, sans-serif; font-weight:600; font-size:13px;" align="center" colspan="2">INVENTORY: {{inventory.code}}</td>
+
+  {% endif %}
+</tr>
+</table>
+{% comment %} <table class="table">
+    <tr>
+        <td style="font-family:Verdana, Geneva, sans-serif; font-weight:300; font-size:15px;" 
+            align="left">{% if lang == 'fr' %} MONTANT TOTAL ENTREE {% else %} TOTAL ENTRY AMOUNT {% endif %}: {{ sum_total_in|intcomma }}</td>
+            <td style="font-family:Verdana, Geneva, sans-serif; font-weight:300; font-size:15px;" 
+            align="left">{% if lang == 'fr' %} MONTANT TOTAL SORTIE {% else %} TOTAL EXIT AMOUNT {% endif %}: {{ sum_total_out|intcomma }}</td>
+    </tr>
+    </table> {% endcomment %}
+<table class="table">
+    <thead>
+        {% if lang == 'fr' %}
+    <tr>
+        <th style="color: black">Ingredient</th>
+                            <th style="color: black">Dépot</th>
+                            <th style="color: black"> Qte théorique </th>
+                            <th style="color: black"> Qte Physique </th>
+                            {% comment %} <th style="color: black"> Écart Qte </th> {% endcomment %}
+                            <th style="color: black"> Mt théorique </th>
+                            <th style="color: black"> Mt physique </th>
+                            {% comment %} <th style="color: black"> Écart Mtt </th> {% endcomment %}
+                            <th style="color: black">Date</th>
+    </tr>
+    {% else %}
+            <tr>
+        <th style="color: black">Ingredient</th>
+                            <th style="color: black">Dépot</th>
+                            <th style="color: black"> Qte théorique </th>
+                            <th style="color: black"> Qte Physique </th>
+                            {% comment %} <th style="color: black"> Écart Qte </th> {% endcomment %}
+                            <th style="color: black"> Mt théorique </th>
+                            <th style="color: black"> Mt physique </th>
+                            {% comment %} <th style="color: black"> Écart Mtt </th> {% endcomment %}
+                            <th style="color: black">Date</th>
+    </tr>
+            {% endif %}
+    </thead>
+    <tbody>
+    {% comment %} {% for result in final_result %} {% endcomment %}
+
+        <!-- Header Nature -->
+        {% comment %} <tr>
+            <td colspan="6"
+                style="font-family:Verdana, Geneva, sans-serif;
+                       font-weight:700;
+                       font-size:14px;
+                       background:#f2f2f2;
+                       padding:8px;">
+                {{ result.nature_name }}
+            </td>
+        </tr>
+
+        <!-- Total -->
+        <tr>
+            <td colspan="6"
+                style="font-family:Verdana, Geneva, sans-serif;
+                       font-weight:600;
+                       font-size:12px;
+                       padding:5px;">
+                Total : {{ result.total }}
+            </td>
+        </tr> {% endcomment %}
+
+        <!-- Movements -->
+        {% for stock_movement in final_result %}
+
+        <tr style="text-align:center">
+          <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.ingredient_name}}</td>
+                            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.storage_depots_name}}</td>
+                            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.quantity_stock}}</td>
+                            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.quantity_adjusted}}</td>
+                            {% comment %} <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;"> Écart Qte </td>                             {% endcomment %}
+                            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.amount}}</td>
+                            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.amount_adjusted}}</td>
+                            {% comment %} <td class="td" style="font-family:Verdana, Geneva, sans-serif; font-size:8px;"> Écart Mtt </td> {% endcomment %}
+                            <td class="td"
+                style="font-family:Verdana, Geneva, sans-serif; font-size:8px;">{{stock_movement.createdAt}}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    {% comment %} {% endfor %} {% endcomment %}
+</tbody>
+</html>
