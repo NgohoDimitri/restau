@@ -63,6 +63,7 @@ class DetailsSuppliesFilter(django_filters.FilterSet):
     date_range = django_filters.DateRangeFilter(field_name='createdAt')
     ingredient = django_filters.CharFilter(field_name='ingredient__id', lookup_expr='exact')
     supplies = django_filters.CharFilter(field_name='supplies__id', lookup_expr='exact')
+    storage_depots = django_filters.CharFilter(field_name='storage_depots__id', lookup_expr='exact')
 
     class Meta:
         model = DetailsSupplies

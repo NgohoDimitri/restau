@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # Application definition
 
 ALLOWED_HOSTS = ['*']
@@ -116,46 +116,8 @@ WSGI_APPLICATION = 'GH.wsgi.application'
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = 'Africa/Douala'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'restaurants',
-#         'USER': 'postgres','HOST': 'host.docker.internal',
-#         'PASSWORD': 'postgres',
-#         'HOST': '127.0.0.1',
-#         'PORT': env('DB_PORT')
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'restaurant_mnzc',
-#         'USER': 'restaurant_mnzc_user',
-#         'PASSWORD': 'OjZ6EhOsELeFQDx8cUal47fiH8M89Aa6',
-#         'HOST': 'dpg-d67ib28boq4c73fvqqk0-a.virginia-postgres.render.com',
-#         'PORT': env('DB_PORT'),
-#         'OPTIONS': {
-#             "options": "-c statement_timeout=10000"   # 10s max par requête SQL
-#         }
-#     }
-# }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'yummy',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres',
-#         'HOST': '127.0.0.1',
-#         'PORT': env('DB_PORT'),
-#         'OPTIONS': {
-#             "options": "-c statement_timeout=10000"   # 10s max par requête SQL
-#         }
-#     }
-# }
-
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# USE_X_FORWARDED_HOST = True
+# # USE_X_FORWARDED_HOST = True
 import dj_database_url
 # SECURE_S# import dj_database_urlSL_REDIRECT = True
 # SYNC_SECRET_KEY = os.environ.get("SYNC_SECRET_KEY")
@@ -166,6 +128,8 @@ DATABASES = {
         ssl_require=True
     )
 }
+
+
         #'HOST': '172.31.224.1',
 
 # Database

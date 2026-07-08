@@ -817,7 +817,8 @@ class Stock_movement(SyncBaseModel):
     code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     date_movement = models.DateField(null=True, blank=True)
-    is_valid= models.BooleanField(default=False)
+    is_valid= models.BooleanField(default=False, null=True, blank=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='delete_stock')
     
     def save(self, *args, **kwargs):
         if not self.code:
@@ -937,10 +938,12 @@ class Bills(SyncBaseModel):
     cash_code = models.CharField(max_length=255, null=True, blank=True)
     cashier_name = models.CharField(max_length=255, null=True, blank=True)
     doctor_name = models.CharField(max_length=255, null=True, blank=True)
-    deleted_by = models.CharField(max_length=255, null=True, blank=True)
+    is_valid= models.BooleanField(default=False, null=True, blank=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='delete_bill')
     code = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, choices=PAYEMENT_STATUS, blank=True, null=True)
     overpayment_action = models.CharField(max_length=255, choices=OVERPAYMENT_ACTION, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     def _generate_code(self):
         current_year = datetime.date.today().year
@@ -1140,6 +1143,8 @@ class ComboMenu(SyncBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_delivery = models.BooleanField(default=True, null=True)
+    is_valid = models.BooleanField(default=False, null=True)
+    code = models.CharField(max_length=255, null=True, blank=True, unique=True)
 
     @property
     def cost(self):
@@ -1147,6 +1152,26 @@ class ComboMenu(SyncBaseModel):
         total = sum([ri.cost for ri in self.ingredients.all()])
         return total
 
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self._generate_code()
+        super().save(*args, **kwargs)
+
+    def _generate_code(self):
+        current_year = datetime.date.today().year
+        last = ComboMenu.objects.filter(code__startswith=f"CBM-{current_year}") \
+            .order_by('-id').first()
+        
+        if last and last.code:
+            try:
+                last_number = int(last.code.split('-')[-1])
+            except ValueError:
+                last_number = 0
+        else:
+            last_number = 0
+
+        next_number = last_number + 1
+        return f"CBM-{current_year}-{next_number:04d}"
     # def save(self, *args, **kwargs):
     #     if not self.code:
     #         # Générer le prochain code unique
@@ -1157,6 +1182,7 @@ class ComboMenu(SyncBaseModel):
     class Meta:
         db_table = 'combo_menu'
         ordering = ('-id',)
+
 
 class ComboMenuTranslation(SyncBaseModel):
     is_shared = models.BooleanField(default=False, null=True)  # Partagé entre structures
@@ -1189,10 +1215,34 @@ class Recipes(SyncBaseModel):
     dish = models.OneToOneField(Dish, on_delete=models.CASCADE, null=True)
     total_amount = models.FloatField(default=0.0, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    is_valid = models.BooleanField(default=False, null=True)
+    code = models.CharField(max_length=255, null=True, blank=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self._generate_code()
+        super().save(*args, **kwargs)
+
+    def _generate_code(self):
+        current_year = datetime.date.today().year
+        last = Recipes.objects.filter(code__startswith=f"RPS-{current_year}") \
+            .order_by('-id').first()
+        
+        if last and last.code:
+            try:
+                last_number = int(last.code.split('-')[-1])
+            except ValueError:
+                last_number = 0
+        else:
+            last_number = 0
+
+        next_number = last_number + 1
+        return f"RPS-{current_year}-{next_number:04d}"
     
     class Meta:
         db_table = 'recipes'
         ordering = ('-createdAt',)
+
 
 
 class ComposeIngredient(SyncBaseModel):
@@ -1204,6 +1254,29 @@ class ComposeIngredient(SyncBaseModel):
     stock_quantity = models.FloatField(default=0, null=True,)  # quantité en unité
     price_per_unit = models.DecimalField(max_digits=12, decimal_places=1, default=0, null=True)
     total_amount = models.FloatField(default=0.0, null=True, blank=True)
+    is_valid = models.BooleanField(default=False, null=True)
+    code = models.CharField(max_length=255, null=True, blank=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self._generate_code()
+        super().save(*args, **kwargs)
+
+    def _generate_code(self):
+        current_year = datetime.date.today().year
+        last = ComposeIngredient.objects.filter(code__startswith=f"CPI-{current_year}") \
+            .order_by('-id').first()
+        
+        if last and last.code:
+            try:
+                last_number = int(last.code.split('-')[-1])
+            except ValueError:
+                last_number = 0
+        else:
+            last_number = 0
+
+        next_number = last_number + 1
+        return f"CPI-{current_year}-{next_number:04d}"
     
     class Meta:
         db_table = 'compose_ingredient'
@@ -1293,6 +1366,30 @@ class ComposePreparation(SyncBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     stock_quantity = models.FloatField(default=0, null=True,)  # nombre de portions préparées
     total_amount = models.DecimalField(max_digits=12, decimal_places=3, default=Decimal('0.000'))
+    is_valid = models.BooleanField(default=False, null=True)
+    code = models.CharField(max_length=255, null=True, blank=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self._generate_code()
+        super().save(*args, **kwargs)
+
+    def _generate_code(self):
+        current_year = datetime.date.today().year
+        last = ComposePreparation.objects.filter(code__startswith=f"COP-{current_year}") \
+            .order_by('-id').first()
+        
+        if last and last.code:
+            try:
+                last_number = int(last.code.split('-')[-1])
+            except ValueError:
+                last_number = 0
+        else:
+            last_number = 0
+
+        next_number = last_number + 1
+        return f"COP-{current_year}-{next_number:04d}"
+    
     class Meta:
         db_table = 'compose_preparation'
         ordering = ('-createdAt',)
@@ -1515,6 +1612,8 @@ class Inventory(SyncBaseModel):
     storage_depots = models.ForeignKey(Storage_depots, on_delete=models.CASCADE, null=True)
     code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    is_valid= models.BooleanField(default=False, null=True, blank=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='delete_inv')
     
     def save(self, *args, **kwargs):
         if not self.code:
@@ -1588,9 +1687,10 @@ class Supplies(SyncBaseModel):
     reference_no = models.CharField(max_length=255, null=True, blank=True)
     storage_depots = models.ForeignKey(Storage_depots, on_delete=models.CASCADE, null=True)
     supply_amount = models.IntegerField(default=0)
-    arrival_date = models.DateField(null=True, blank=True)
     is_accounted = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    is_valid= models.BooleanField(default=False, null=True, blank=True)
+    deleted_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='delete_sup')
     
     def save(self, *args, **kwargs):
         if not self.code:
@@ -1899,6 +1999,7 @@ class DetailsSupplies(SyncBaseModel):
     business_unit = models.IntegerField(default=0,null=True, blank=True)
     arrival_price = models.IntegerField(default=0,null=True, blank=True)
     unit_price = models.FloatField(default=0.0,null=True, blank=True)
+    storage_depots = models.ForeignKey(Storage_depots, on_delete=models.CASCADE, null=True)
     cmup = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # prix par unité
     class Meta:
         db_table = 'details_supplies'

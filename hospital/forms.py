@@ -263,7 +263,6 @@ class SuppliesForm(forms.ModelForm):
     code = forms.CharField(required=False)
     reference_no = forms.CharField(required=False)
     arrival_date = forms.CharField(required=False)
-    arr = forms.CharField(required=False)
     supply_amount = forms.IntegerField(required=False)
     additional_info = forms.CharField(max_length=255, required=False)
     is_accounted = forms.BooleanField(initial=False, required=False)
@@ -271,6 +270,8 @@ class SuppliesForm(forms.ModelForm):
     class Meta:
         model = Supplies
         fields = '__all__'
+
+
 class RecipesForm(forms.ModelForm):
     sync_version = forms.IntegerField(required=False)
     is_shared = forms.BooleanField(initial=False, required=False)  # Partagé entre structures
@@ -359,6 +360,7 @@ class BillsForm(forms.ModelForm):
     code = forms.CharField(max_length=255, required=False)
     is_proforma = forms.BooleanField(required=False)
     is_proforma_valid = forms.BooleanField(required=False)
+    user = forms.ModelChoiceField(required=False, queryset=User.objects.all())
 
     address = forms.CharField(max_length=2555, required=False)
     delivery_fee = forms.FloatField(required=False)
@@ -482,6 +484,7 @@ class DetailsSuppliesForm(forms.ModelForm):
     cmup = forms.DecimalField(required=False, decimal_places=2, max_digits=12)
     type_product = forms.CharField(required=False)
     ingredient = forms.ModelChoiceField(required=False, queryset=Ingredient.objects.all())
+    storage_depots = forms.ModelChoiceField(required=False, queryset=Storage_depots.objects.all())
 
     class Meta:
         model = DetailsSupplies

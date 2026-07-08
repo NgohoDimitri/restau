@@ -4,23 +4,21 @@ from hospital.forms import RecipesForm
 from rest_framework import viewsets
 
 from hospital.helpers import checkBool, checkContent, checkNumber, destocker
-from hospital.models import Category, CategoryTranslation, ComboMenu, ComboMenuTranslation, ComposeIngredient, ComposeIngredientTranslation, ComposePreparation, ComposePreparationTranslation, DetailsComboMenu, DetailsComposeIngredient, DetailsComposePreparation, Dish, DishPreparation, DishTranslation, Ingredient, IngredientTranslation, Promotion, PromotionAction, PromotionRule, PromotionTranslation, RecipeIngredient, Recipes, Stock, Storage_depots, StructureArticle, User
+from hospital.models import Category, ComboMenu, ComboMenuTranslation, ComposeIngredient, ComposeIngredientTranslation, ComposePreparation, ComposePreparationTranslation, DetailsComboMenu, DetailsComposeIngredient, DetailsComposePreparation, Dish, DishPreparation, DishTranslation, Ingredient, IngredientTranslation, Promotion, PromotionAction, PromotionRule, PromotionTranslation, RecipeIngredient, Recipes, Stock, Storage_depots, StructureArticle, User
 from hospital.serializers import ComboMenuSerializer, ComposeIngredientSerializer, ComposePreparationSerializer, DetailsComboMenuSerializer, DetailsComposeIngredientSerializer, DetailsComposePreparationSerializer, DishSerializer, IngredientSerializer, PromotionActionSerializer, PromotionRuleSerializer, PromotionSerializer, RecipeIngredientSerializer, DishPreparationSerializer, RecipesSerializer, StructureArticleSerializer
 from restaurants.filters import ComboMenuFilter, ComposeIngredientFilter, ComposePreparationFilter, DetailsComboMenuFilter, DetailsComposeIngredientFilter, DetailsComposePreparationFilter, DishFilter, DishPreparationFilter, IngredientFilter, PromotionActionFilter, PromotionFilter, PromotionRuleFilter, RecipeIngredientFilter, StructureArticleFilter
 from restaurants.forms import ComboMenuForm, ComposeIngredientForm, ComposePreparationForm, DetailsComboMenuForm, DetailsComposeIngredientForm, DetailsComposePreparationForm, DishForm, DishPreparationForm, IngredientForm, PromotionActionForm, PromotionForm, PromotionRuleForm, RecipeIngredientForm, StructureArticleForm
-from rest_framework.decorators import action, permission_classes, api_view
-from django.shortcuts import render
-from collections import OrderedDict
-from itertools import chain
-from django.db.models import F, ForeignKey, Sum, Avg, Max, Count
+from rest_framework.decorators import action
+from django.db.models import F,  Count
 from django_filters import rest_framework as filters
-from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated, DjangoModelPermissions
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from globals.pagination import CustomPagination
 from rest_framework import status
 import pandas as pd
+from datetime import date
+from django.db import transaction
 
 class DishViewSet(viewsets.ModelViewSet):
     queryset = Dish.objects.prefetch_related("prices").filter(deleted=False)
@@ -51,14 +49,7 @@ class DishViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -327,14 +318,7 @@ class PromotionViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -466,14 +450,7 @@ class PromotionRuleViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -553,14 +530,7 @@ class PromotionActionViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -639,14 +609,7 @@ class PromotionActionViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -726,14 +689,7 @@ class DishPreparationViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -820,14 +776,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -1041,14 +990,7 @@ class StructureArticleViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -1134,14 +1076,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -1201,17 +1136,26 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-        lines = Recipes.objects.annotate(
-            line_count=Count('recipe_ingredients'),
-        ).filter(line_count=0, user_id=request.user.id)
-        lines.delete()
+        current_year = date.today().year
+        sup=Recipes.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"RPS-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=RecipeIngredient.objects.filter(hospital=self.request.user.hospital, recipes=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=Recipes.objects.create(
+                    hospital=self.request.user.hospital,
+                    total_amount=0,
+                    user_id=request.user.id
+                )
+        else:
         
-        supply = Recipes.objects.create(
-            dish=None,
-            total_amount=0,
-            user_id = request.user.id
-        )
-        return Response(data={"id": supply.id}, status=status.HTTP_200_OK)
+            supply=Recipes.objects.create(
+                hospital=self.request.user.hospital,
+                total_amount=0,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code": supply.code, }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='title/exists', permission_classes=[AllowAny])
     def check_obj(self, request, *args, **kwargs):
@@ -1261,20 +1205,17 @@ class ComposeIngredientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
         user=self.request.user
         obj_form = ComposeIngredientForm(request.data)
         if obj_form.is_valid():
+            obj=obj_form.save(commit=False)
+            obj.id=request.data['compose_ingredient']
+            obj.is_valid=True
+            obj.save()
             get_compose = ComposeIngredient.objects.filter(id=request.data['compose_ingredient'], deleted = False).last()
             get_compose.name_language = request.data['name_language']
             # get_compose.stock_quantity = request.data['stock_quantity']
@@ -1362,16 +1303,26 @@ class ComposeIngredientViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-        lines = ComposeIngredient.objects.annotate(
-            line_count=Count('compose_ingredients'),
-        ).filter(line_count=0, user_id=request.user.id)
-        lines.delete()
-
-        supply = ComposeIngredient.objects.create(
-            total_amount=0,
-            user_id = request.user.id
-        )
-        return Response(data={"id": supply.id}, status=status.HTTP_200_OK)
+        current_year = date.today().year
+        sup=ComposeIngredient.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"CPI-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsComposeIngredient.objects.filter(hospital=self.request.user.hospital, compose_ingredient=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=ComposeIngredient.objects.create(
+                    hospital=self.request.user.hospital,
+                    total_amount=0,
+                    user_id=request.user.id
+                )
+        else:
+        
+            supply=ComposeIngredient.objects.create(
+                hospital=self.request.user.hospital,
+                total_amount=0,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code": supply.code, }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='name/exists', permission_classes=[AllowAny])
     def check_obj(self, request, *args, **kwargs):
@@ -1421,44 +1372,34 @@ class ComboMenuViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
-
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
-        user=self.request.user
         obj_form = ComboMenuForm(request.data)
         if obj_form.is_valid():
-            get_combo = ComboMenu.objects.filter(id=request.data['combo_menu'], deleted = False).last()
-            get_combo.name_language = request.data['name_language']
-            # get_combo.is_active = 
-            # get_combo.is_delivery = 
-            # get_compose.stock_quantity = request.data['stock_quantity']
-            get_combo.save()
+            obj=obj_form.save(commit=False)
+            obj.id=request.data['combo_menu']
+            obj.is_valid=True
+            obj.save()
             for translate in self.request.data['name_language']:
-                get_translate = ComboMenuTranslation.objects.filter(combo_menu_id=get_combo.id, language=translate['language'], deleted = False).last()
+                get_translate = ComboMenuTranslation.objects.filter(combo_menu_id=obj.id, language=translate['language'], deleted = False).last()
                 if get_translate:
                     get_translate.name = translate['name']
                     get_translate.save()
                 else:
-                    ComboMenuTranslation.objects.create(user=self.request.user, combo_menu_id=get_combo.id, language=translate['language'], name = translate['name'])
+                    ComboMenuTranslation.objects.create(user=self.request.user, combo_menu_id=obj.id, language=translate['language'], name = translate['name'])
             
             # for ingredient in get_ingredient:
             #     destocker(ingredient.ingredient, ingredient.quantity, get_ingredient.id, hospital = user.hospital, source="SUP DISH")
             # obj = obj_form.save()
             # obj.hospital = self.request.user.hospital
             # obj.save()
-            serializer = self.get_serializer(get_combo, many=False)
+            serializer = self.get_serializer(obj, many=False)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         errors = {**obj_form.errors}
         return Response(data=errors, status=status.HTTP_400_BAD_REQUEST)
-
+    @transaction.atomic
     def update(self, request, *args, **kwargs):
         user=self.request.user
         obj = self.get_object()
@@ -1511,18 +1452,25 @@ class ComboMenuViewSet(viewsets.ModelViewSet):
 
         supply.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-        lines = ComboMenu.objects.annotate(
-            line_count=Count('combo_menus'),
-        ).filter(line_count=0, user_id=request.user.id)
-        lines.delete()
-
-        supply = ComboMenu.objects.create(
-            user_id = request.user.id
-        )
-        return Response(data={"id": supply.id}, status=status.HTTP_200_OK)
+        current_year = date.today().year
+        sup=ComboMenu.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"CBM-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsComboMenu.objects.filter(hospital=self.request.user.hospital, combo_menu=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=ComboMenu.objects.create(
+                    hospital=self.request.user.hospital,
+                    user_id=request.user.id
+                )
+        else:
+            supply=ComboMenu.objects.create(
+                hospital=self.request.user.hospital,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code": supply.code, }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='name/exists', permission_classes=[AllowAny])
     def check_obj(self, request, *args, **kwargs):
@@ -1574,16 +1522,9 @@ class ComposePreparationViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
-
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         user=self.request.user
         obj_form = ComposePreparationForm(request.data)
@@ -1647,18 +1588,26 @@ class ComposePreparationViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-
-        lines = ComposePreparation.objects.annotate(
-            line_count=Count('compose_preparations'),
-        ).filter(line_count=0, user_id=request.user.id, hospital=request.user.hospital)
-        lines.delete()
-
-        compose = ComposePreparation.objects.create(
-            hospital=request.user.hospital,
-            total_amount=0,
-            user_id = request.user.id
-        )
-        return Response(data={"id": compose.id}, status=status.HTTP_200_OK)
+        current_year = date.today().year
+        sup=ComposePreparation.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"COP-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsComposePreparation.objects.filter(hospital=self.request.user.hospital, compose_ingredient=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=ComposePreparation.objects.create(
+                    hospital=self.request.user.hospital,
+                    total_amount=0,
+                    user_id=request.user.id
+                )
+        else:
+        
+            supply=ComposePreparation.objects.create(
+                hospital=self.request.user.hospital,
+                total_amount=0,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code": supply.code, }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='title/exists', permission_classes=[AllowAny])
     def check_obj(self, request, *args, **kwargs):
@@ -1713,14 +1662,7 @@ class RecipeIngredientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
     def create(self, request, *args, **kwargs):
@@ -1923,14 +1865,7 @@ class DetailsComposeIngredientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2051,14 +1986,7 @@ class DetailsComboMenuViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2168,14 +2096,7 @@ class DetailsComposePreparationViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):

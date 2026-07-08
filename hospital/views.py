@@ -283,14 +283,7 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -1092,14 +1085,7 @@ class Expenses_natureViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -1195,14 +1181,7 @@ class CashViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -1757,14 +1736,7 @@ class Cash_movementViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2020,14 +1992,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2177,14 +2142,7 @@ class SeasonViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2430,14 +2388,7 @@ class ArchiveViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2499,14 +2450,7 @@ class BackupFileViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -2577,14 +2521,7 @@ class CityViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     
@@ -2706,14 +2643,7 @@ class DistrictViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     
@@ -2836,14 +2766,7 @@ class RegionViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     
@@ -2941,14 +2864,7 @@ class SuppliesViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
     @transaction.atomic
@@ -2957,11 +2873,16 @@ class SuppliesViewSet(viewsets.ModelViewSet):
         supplies_form = SuppliesForm(request.data)
         if supplies_form.is_valid():
             user = self.request.user
-            supplies = Supplies.objects.filter(id=request.data['supplies'], hospital = user.hospital, user=user, deleted = False).last()
-
-            # supplies = supplies_form.save()
-            # supplies.hospital = user.hospital
-            # supplies.save()
+            supplies = supplies_form.save(commit=False)
+            supplies.id = request.data['supplies']
+            supplies.hospital = user.hospital
+            supplies.user = user
+            supplies.is_valid = True
+            if 'arrival_date' in request.data:
+                supplies.createdAt=request.data['arrival_date']
+            else:
+                supplies.createdAt = timezone.now()
+            supplies.save()
             get_details_supplies = DetailsSupplies.objects.filter(hospital=user.hospital,
                 user_id=user.id, supplies=request.data['supplies']
             ).filter(deleted=False)
@@ -2988,21 +2909,6 @@ class SuppliesViewSet(viewsets.ModelViewSet):
                     get_stock.cmup = supplie.cmup
                     
                     get_stock.save()
-                    # if supplie.quantity_two:
-                    #     get_stock.quantity_two += supplie.quantity_two
-                    # get_stock.save()
-                    
-                    # unit_cost = supplie.arrival_price / supplie.quantity
-                    # if get_stock.quantity > 0:
-                    #     old_value = Decimal(get_stock.quantity) * Decimal(get_ingredient.price_per_unit)
-                    #     new_value = Decimal(supplie.quantity) * Decimal(unit_cost)
-
-                    #     total_qty = Decimal(get_stock.quantity) + Decimal(supplie.quantity)
-                    #     price = (old_value + new_value) / total_qty
-
-                    #     get_ingredient.cmup = price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-                    # else:
-                    #     pass
                     
                     MovementStock.objects.create(
                         ingredient=supplie.ingredient,
@@ -3035,12 +2941,6 @@ class SuppliesViewSet(viewsets.ModelViewSet):
                 get_ingredient.last_paid_price=supplie.total_amount
                 get_ingredient.save()
     
-                
-            supplies.supply_amount=request.data['supply_amount']
-            supplies.storage_depots_id=request.data['storage_depots']
-            supplies.supply_amount=request.data['supply_amount']
-            
-            supplies.createdAt=formatted_date(date_str=request.data['arrival_date'])
             supplies.save()
                 
             serializer = self.get_serializer(supplies, many=False)
@@ -3108,12 +3008,57 @@ class SuppliesViewSet(viewsets.ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         errors = {**supplies_form.errors}
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-
+    @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         supplies = self.get_object()
-        supplies.deleted = True
-        supplies.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        user =self.request.user
+        get_user = User.objects.filter(hospital = user.hospital,username=request.data['username'], deleted=False, role__in=['admin', 'responsible']).first()
+        if get_user:
+            if get_user.check_password(request.data['password']):
+                supplies.deleted = True
+                get_details_supplies=DetailsSupplies.objects.filter(supplies_id=supplies,hospital=self.request.user.hospital
+                    ).all()
+                
+                for supplie in get_details_supplies:
+                        # supplie.save()
+
+                    get_stock=Stock.objects.filter(hospital=user.hospital,
+                        ingredient_id=supplie.ingredient_id,
+                        storage_depots_id=supplie.storage_depots_id,
+                    ).last()
+
+                    
+                    
+                    get_stock.quantity -= supplie.quantity
+                    get_stock.save()
+                    price_per_unit= Decimal(supplie.total_amount) / Decimal(supplie.quantity)
+                    MovementStock.objects.create(
+                        ingredient=supplie.ingredient,
+                        type="EXIT",
+                        stock_before = Decimal(get_stock.quantity),
+                        stock_after= Decimal(get_stock.quantity) - Decimal(supplie.quantity),
+                        quantity=Decimal(supplie.quantity),
+                        unit_cost = price_per_unit,
+                        total_cost = price_per_unit * supplie.quantity,
+                        source="DELETE SUPPLIE",
+                        reference_id=supplies.id,
+                        hospital = user.hospital
+                    )
+                    
+                    supplie.deleted=True
+                    supplie.save()
+                supplies.deleted_by = self.request.user
+                supplies.deletedAt = timezone.now()
+                supplies.save()
+                
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                errors = {"credential": ["Username or password incorrect."]}
+                return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+                {"detail": "You don't have permission."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     @action(detail=False, methods=['post'], url_path='name/exists', permission_classes=[AllowAny])
     def check_category(self, request, *args, **kwargs):
@@ -3145,18 +3090,28 @@ class SuppliesViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-        lines = Supplies.objects.annotate(
-            line_count=Count('supplies'),
-        ).filter(line_count=0, hospital=self.request.user.hospital,user_id=self.request.user.id)
-        lines.delete()
-
-        supply = Supplies.objects.create(
-            hospital=self.request.user.hospital,
-            suppliers=None,
-            supply_amount=0,
-            user_id = request.user.id
-        )
-        return Response(data={"id": supply.id}, status=status.HTTP_200_OK)
+        current_year = date.today().year
+        sup=Supplies.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"SUP-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsSupplies.objects.filter(hospital=self.request.user.hospital,supplies=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=Supplies.objects.create(
+                    hospital=self.request.user.hospital,
+                    suppliers=None,
+                    supply_amount=0,
+                    user_id=request.user.id
+                )
+        else:
+        
+            supply=Supplies.objects.create(
+                hospital=self.request.user.hospital,
+                suppliers=None,
+                supply_amount=0,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code": supply.code, }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path='peremption')
     def peremption(self, request, *args, **kwargs):
@@ -4196,14 +4151,7 @@ class BillViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -4211,20 +4159,25 @@ class BillViewSet(viewsets.ModelViewSet):
         user = self.request.user
         bills_form = BillsForm(request.data)
         if bills_form.is_valid():
-            # bills = bills_form.save()
-            # bills.hospital = user.hospital
+            bills = bills_form.save(commit=False)
+            bills.id = request.data['bills']
+            bills.hospital=self.request.user.hospital
+            bills.user = self.request.user
+            bills.is_valid=True
+            if 'bills_date' in request.data:
+                bills.createdAt=request.data['bills_date']
+            else:
+                bills.createdAt = timezone.now()
             
             get_cash = Cash.objects.filter(hospital = user.hospital,user_id=request.data['cashier'], is_active=True, type_cash='CASH_COUNTERS', deleted = False).last()
-            bills = Bills.objects.filter(hospital = user.hospital, id=request.data['bills'], deleted = False).last()
             if get_cash:
                 bills.cash_id = get_cash.id
                 bills.cash_code = get_cash.code
-                bills.createdAt = formatted_date(date_str=request.data['bills_date'])
                 bills.cashier_name = get_cash.user.username
-                bills.patient_id=request.data['patient']
-                bills.district_id=request.data['district']
-                bills.storage_depots_id=request.data['storage_depots']
-                bills.bill_type=request.data['bill_type']
+                # bills.patient_id=request.data['patient']
+                # bills.district_id=request.data['district']
+                # bills.storage_depots_id=request.data['storage_depots']
+                # bills.bill_type=request.data['bill_type']
                 if request.data['catering']:
                     bills.catering_id = request.data['catering']
                 if request.data['event']:
@@ -4546,7 +4499,7 @@ class BillViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         user = self.request.user
-        get_user = User.objects.filter(hospital = user.hospital,username=request.data['username'], deleted=False).first()
+        get_user = User.objects.filter(hospital = user.hospital,username=request.data['username'], deleted=False, role__in=['admin', 'responsible']).first()
         if get_user.check_password(request.data['password']):
             # if get_user.has_perm('core.delete_bills'):
             get_details_bills = DetailsBills.objects.filter(hospital = user.hospital,bills_id=kwargs['pk'], deleted=False)
@@ -4610,7 +4563,7 @@ class BillViewSet(viewsets.ModelViewSet):
                 pass
             get_bills = Bills.objects.filter(id=kwargs['pk'], hospital = user.hospital,deleted=False).last()
             get_bills.deleted = True
-            get_bills.deleted_by = user.username
+            get_bills.deleted_by = user
             get_bills.deletedAt = timezone.now()
             get_bills.save()            
             # get_cash = Cash.objects.filter(type_cash='CASH_COUNTERS',hospital = user.hospital, id=get_bills.cash_id, deleted=False).last()
@@ -4637,7 +4590,6 @@ class BillViewSet(viewsets.ModelViewSet):
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], url_path='all')
-    
     def get_all_bill(self, request, *args, **kwargs):
         
         queryset = self.filter_queryset(self.get_queryset())
@@ -4648,36 +4600,6 @@ class BillViewSet(viewsets.ModelViewSet):
         # content = {'content': {'solde_patient': get_bills}}
         return Response(data=content, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path='assistant')
-    def assistant_ai(self, request, *args, **kwargs):
-        
-        question = request.data.get("question", "").strip()
-
-        if not question:
-            return Response(
-                {"error": "Veuillez poser une question."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if len(question) > 500:
-            return Response(
-                {"error": "Question trop longue (max 500 caractères)."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            reponse = ask_assistant(question)
-            return Response({
-                "question": question,
-                "reponse": reponse,
-                "status": "success"
-            })
-        except Exception as e:
-            return Response(
-                {"error": f"Erreur assistant : {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
     @action(detail=True, methods=['DELETE'], url_path='delete-empty')
     def delete_empty(self, request, pk=None):
         bills = self.get_object()
@@ -4695,17 +4617,27 @@ class BillViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-
-        lines = Bills.objects.annotate(
-            line_count=Count('bills'),
-        ).filter(line_count=0, hospital=request.user.hospital, status__isnull=True)
-        lines.delete()
-        bills = Bills.objects.create(
-            hospital=self.request.user.hospital,
-            patient=None,
-            total_amount=0
-        )
-        return Response(data={"id": bills.id}, status=status.HTTP_200_OK)
+        current_year = date.today().year
+        sup=Bills.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, status__isnull=True,code__startswith=f"FAC-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsBills.objects.filter(hospital=self.request.user.hospital, bills=sup).last()
+            if get_details_supplies:
+                bills = sup
+            else:
+                bills=Bills.objects.create(
+                    hospital=self.request.user.hospital,
+                    patient=None,
+                    user_id=self.request.user.id,
+                    total_amount=0
+                )
+        else:
+            bills=Bills.objects.create(
+                hospital=self.request.user.hospital,
+                patient=None,
+                user_id=self.request.user.id,
+                total_amount=0
+            )
+        return Response(data={"id": bills.id, "code":bills.code}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path='verify_permission')
     def verify_permission(self, request, *args, **kwargs):
@@ -6494,14 +6426,7 @@ class PatientSettlementViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -6757,14 +6682,7 @@ class SuppliersViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -6873,14 +6791,7 @@ class Type_patientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -6965,14 +6876,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -7355,14 +7259,7 @@ class PatientAccountViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -7480,7 +7377,7 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
                 
                 detailsSupplies = detailsSupplies_form.save()
                 detailsSupplies.hospital = user.hospital
-                detailsSupplies.storage_depots = request.data["storage_depots"]
+                detailsSupplies.storage_depots_id = request.data["storage_depots"]
                 detailsSupplies.supplies = get_supplies
                 unit_cost = detailsSupplies.total_amount / detailsSupplies.quantity
                 detailsSupplies.unit_price = unit_cost
@@ -7491,7 +7388,8 @@ class DetailsSuppliesViewSet(viewsets.ModelViewSet):
                         id=detailsSupplies.ingredient_id, deleted = False
                     ).last()
                 if get_stock:
-                    old_value = Decimal(get_stock.quantity) * Decimal(get_ingredient.price_per_unit)
+                    print(get_stock.quantity, get_ingredient.price_per_unit)
+                    old_value = Decimal(get_stock.quantity) * Decimal(get_ingredient.price_per_unit) or 0
                     new_value = Decimal(detailsSupplies.quantity) * Decimal(unit_cost)
                     total_qty = Decimal(get_stock.quantity) + Decimal(detailsSupplies.quantity)
                     price = (old_value + new_value) / total_qty
@@ -7657,14 +7555,7 @@ class DetailsPatientAccountViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -7796,14 +7687,7 @@ class InsuranceViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -8009,14 +7893,7 @@ class Storage_depotsViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -8373,28 +8250,21 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         inventory_form = InventoryForm(request.data)
         if inventory_form.is_valid():
-            # inventory = inventory_form.save()
-            # inventory.hospital = self.request.user.hospital
-            # # inventory_update(user=user, inventory=inventory, request=request)
-            # inventory.save()
-            get_inventory = Inventory.objects.filter(hospital = self.request.user.hospital, user=self.request.user, id=request.data['inventory'], deleted = False).last()
-            get_inventory.storage_depots_id = request.data['storage_depots']
-            get_inventory.reason_inventory = request.data['reason_inventory']
-            get_inventory.createdAt = formatted_date(date_str=request.data['date_inventory'])
+            get_inventory = inventory_form.save(commit=False)
+            get_inventory.id = request.data['inventory']
+            get_inventory.hospital = self.request.user.hospital
+            get_inventory.is_valid = True
+            if 'date_inventory' in request.data:
+                get_inventory.createdAt=request.data['date_inventory']
+            else:
+                get_inventory.createdAt = timezone.now()
             get_inventory.save()
             get_details_inv = DetailsInventory.objects.filter(hospital = self.request.user.hospital, inventory_id=request.data[
                     'inventory']).filter(deleted=False)
@@ -8406,6 +8276,18 @@ class InventoryViewSet(viewsets.ModelViewSet):
                 get_details_stock.quantity = inv.quantity_adjusted
                 get_details_stock.cmup = inv.cmup
                 get_details_stock.save()
+                MovementStock.objects.create(
+                    ingredient=inv,
+                    hospital = self.request.user.hospital,
+                    type="ENTRY",
+                    stock_before = Decimal(get_details_stock.qte_stock) - Decimal(inv.quantity_adjusted),
+                    stock_after= Decimal(get_details_stock.qte_stock),
+                    quantity=Decimal(inv.quantity),
+                    unit_cost = Decimal(inv.ingredient.price_per_unit),
+                    total_cost = Decimal(inv.ingredient.price_per_unit) * Decimal(inv.quantity_adjusted),
+                    source="INV",
+                    reference_id=get_inventory.id
+                )
                 
             # get_hospital = Hospital.objects.filter(id=self.request.user.hospital.id).last()
             # get_hospital.is_inventory = False
@@ -8425,11 +8307,47 @@ class InventoryViewSet(viewsets.ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         errors = {**inventory_form.errors}
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
+    @transaction.atomic
     def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        obj.deleted = True
-        obj.save()
+        user = self.reauest.user
+        inventory=self.get_object()
+        get_details_supplies=DetailsInventory.objects.filter(inventory=inventory,hospital=self.request.user.hospital
+            ).all()
+        
+        for supplie in get_details_supplies:
+                # supplie.save()
+
+            get_stock=Stock.objects.filter(hospital=user.hospital,
+                ingredient_id=supplie.ingredient_id,
+                storage_depots_id=supplie.storage_depots_id,
+            ).last()
+
+            
+            
+            get_stock.quantity -= supplie.quantity_adjusted
+            get_stock.save()
+            price_per_unit= Decimal(supplie.amount_adjusted) / Decimal(supplie.quantity_adjusted)
+            MovementStock.objects.create(
+                ingredient=supplie.ingredient,
+                type="ENTRY",
+                stock_before = Decimal(get_stock.qte_stock),
+                stock_after= Decimal(get_stock.qte_stock) - Decimal(supplie.quantity_adjusted),
+                quantity=Decimal(supplie.quantity_adjusted),
+                unit_cost = price_per_unit,
+                total_cost = price_per_unit * supplie.quantity_adjusted,
+                source="DELETE INVENTORY",
+                reference_id=inventory.id,
+                hospital = user.hospital
+            )
+            
+            supplie.deleted=True
+            supplie.save()
+
+        inventory.deleted = True
+        inventory.deleted_by = user
+        inventory.deletedAt = timezone.now()
+        inventory.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
        
     @action(detail=True, methods=['DELETE'], url_path='delete-empty')
@@ -8449,16 +8367,25 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-        lines = Inventory.objects.annotate(
-            line_count=Count('inventories'),
-        ).filter(line_count=0, hospital=self.request.user.hospital, user_id=self.request.user.id)
-        lines.delete()
 
-        supply = Inventory.objects.create(
-            hospital=self.request.user.hospital,
-            user_id = request.user.id
-        )
-        return Response(data={"id": supply.id}, status=status.HTTP_200_OK)
+        current_year = date.today().year
+        sup=Inventory.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"INV-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsInventory.objects.filter(hospital=self.request.user.hospital,inventory=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=Inventory.objects.create(
+                    hospital=self.request.user.hospital,
+                    user_id=request.user.id
+                )
+        else:
+
+            supply=Inventory.objects.create(
+                hospital=self.request.user.hospital,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code": supply.code}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='close')
     def close(self, request, *args, **kwargs):
@@ -8684,21 +8611,22 @@ class Stock_movementViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         user=self.request.user
         stock_movement_form = Stock_movementForm(request.data)
         if stock_movement_form.is_valid():
-            
+            get_stock_movement = stock_movement_form.save(commit=False)
+            get_stock_movement.id = request.data['stock_movement']
+            get_stock_movement.hospital = self.request.user.hospital
+            get_stock_movement.is_valid = True
+            if 'date_movement' in request.data:
+                get_stock_movement.createdAt=request.data['date_movement']
+            else:
+                get_stock_movement.createdAt = timezone.now()
+            get_stock_movement.save()
             get_details_stock_movement = DetailsStock_movement.objects.filter(hospital = user.hospital, stock_movement=request.data['stock_movement']).filter(deleted=False)
             for stock_mov in get_details_stock_movement:
                 get_details_stock = Stock.objects.filter(hospital = user.hospital,
@@ -8711,15 +8639,39 @@ class Stock_movementViewSet(viewsets.ModelViewSet):
                         get_details_stock.quantity += int(
                             stock_mov.quantity)
                         get_details_stock.save()
-                    elif stock_mov.type_movement == 'EXIT':
-                        get_details_stock.quantity -= int(
-                            stock_mov.quantity)
+
+                        MovementStock.objects.create(
+                            ingredient=stock_mov.ingredient,
+                            hospital = self.request.user.hospital,
+                            type="ENTRY",
+                            stock_before = Decimal(get_details_stock.qte_stock) - Decimal(stock_mov.quantity),
+                            stock_after= Decimal(get_details_stock.qte_stock),
+                            quantity=Decimal(stock_mov.quantity),
+                            unit_cost = Decimal(stock_mov.ingredient.price_per_unit),
+                            total_cost = Decimal(stock_mov.ingredient.price_per_unit) * Decimal(stock_mov.quantity),
+                            source="INV",
+                            reference_id=request.data['stock_movement']
+                        )
+                    elif stock_mov.type_movement == 'EXIT' or stock_mov.type_movement == 'TRANSFER':
+                        get_details_stock.quantity -= int(stock_mov.quantity)
                         get_details_stock.save()
-                    elif stock_mov.type_movement == 'TRANSFER':
-                        get_details_stock.quantity -= int(
-                            stock_mov.quantity)
+
+                        MovementStock.objects.create(
+                            ingredient=stock_mov.ingredient,
+                            hospital = self.request.user.hospital,
+                            type="ENTRY",
+                            stock_before = Decimal(get_details_stock.qte_stock) + Decimal(stock_mov.quantity),
+                            stock_after= Decimal(get_details_stock.qte_stock),
+                            quantity=Decimal(stock_mov.quantity),
+                            unit_cost = Decimal(stock_mov.ingredient.price_per_unit),
+                            total_cost = Decimal(stock_mov.ingredient.price_per_unit) * Decimal(stock_mov.quantity),
+                            source="INV",
+                            reference_id=request.data['stock_movement']
+                        )
+
+
                 else:
-                    get_details_stock = Stock.objects.create(hospital = user.hospital,ingredient_id=get_details_stock.ingredient.id, quantity = 0, storage_depots_id=stock_mov.storage_depots.id)
+                    get_details_stock = Stock.objects.create(hospital = user.hospital, ingredient_id=get_details_stock.ingredient.id, quantity = 0, storage_depots_id=stock_mov.storage_depots.id)
                     if stock_mov.type_movement == 'ENTRY':
                         get_details_stock.quantity += int(
                             stock_mov.quantity)
@@ -8746,13 +8698,6 @@ class Stock_movementViewSet(viewsets.ModelViewSet):
                         get_details_stock.save()
                         Stock.objects.create(hospital = user.hospital,ingredient_id=get_details_stock.ingredient.id, quantity = int(stock_mov.quantity), storage_depots_id=stock_mov.storage_depots_dest.id)
                     
-            get_stock_movement = Stock_movement.objects.filter(id=request.data['stock_movement'],hospital = user.hospital,user=user, deleted = False).last()
-            get_stock_movement.storage_depots_id = request.data['storage_depots']
-            get_stock_movement.type_movement = request.data['type_movement']
-            get_stock_movement.reason_movement = request.data['reason_movement']
-            get_stock_movement.movement_value = request.data['movement_value']
-            get_stock_movement.createdAt = formatted_date(date_str=request.data['date_movement'])
-            get_stock_movement.save()
             
             serializer = self.get_serializer(get_stock_movement, many=False)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
@@ -8847,17 +8792,26 @@ class Stock_movementViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='create-empty')
     def create_empty(self, request):
-        lines = Stock_movement.objects.annotate(
-            line_count=Count('stock_movements'),
-        ).filter(line_count=0, hospital=self.request.user.hospital, user_id=self.request.user.id)
-        lines.delete()
+        current_year = date.today().year
+        sup=Stock_movement.objects.filter(hospital=self.request.user.hospital,user_id=self.request.user.id, is_valid=False,code__startswith=f"STM-{current_year}").order_by('-code').first()
+        if sup:
+            get_details_supplies=DetailsStock_movement.objects.filter(hospital=self.request.user.hospital,stock_movement=sup).last()
+            if get_details_supplies:
+                supply = sup
+            else:
+                supply=Stock_movement.objects.create(
+                    hospital=self.request.user.hospital,
+                    movement_value=0,
+                    user_id=request.user.id
+                )
+        else:
 
-        supply = Stock_movement.objects.create(
-            hospital=self.request.user.hospital,
-            movement_value=0,
-            user_id = request.user.id
-        )
-        return Response(data={"id": supply.id}, status=status.HTTP_200_OK)
+            supply=Stock_movement.objects.create(
+                hospital=self.request.user.hospital,
+                movement_value=0,
+                user_id=request.user.id
+            )
+        return Response(data={"id": supply.id, "code":supply.code}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='print')
     def print(self, request, *args, **kwargs):
@@ -8964,14 +8918,7 @@ class DeliveryInfoViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -9043,14 +8990,7 @@ class EventInfoViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -9155,14 +9095,7 @@ class CateringInfoViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -9265,14 +9198,7 @@ class DetailsBillsIngredientViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -9387,14 +9313,7 @@ class MovementStockViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            user = self.request.user
-            if isinstance(user, User):
-                permission_classes = [IsAuthenticated]
-            else:
-                permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
+        permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):

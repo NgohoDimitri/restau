@@ -1270,6 +1270,7 @@ class DetailsSuppliesSerializer(DynamicFieldsModelSerializer):
     """
     supplies = SuppliesSerializer(many=False, fields=('id', 'code', 'createdAt', 'suppliers'))
     ingredient = IngredientSerializer(many=False, fields=('id', 'name'))
+    storage_depots = Storage_depotsSerializer(many=False, fields=('id', 'name'))
     
 
     class Meta:

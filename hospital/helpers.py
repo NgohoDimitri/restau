@@ -465,14 +465,20 @@ def destocker(user, ingredient, quantity, facture_id, storage_depots, hospital, 
 
     stock.quantity -= quantity
     stock.save()
+    
     MovementStock.objects.create(
         ingredient=ingredient,
         hospital = hospital,
         type="EXIT",
-        quantity=quantity,
+        stock_before = Decimal(stock.qte_stock) + Decimal(quantity),
+        stock_after= Decimal(stock.qte_stock),
+        quantity=Decimal(quantity),
+        unit_cost = Decimal(ingredient.price_per_unit),
+        total_cost = Decimal(ingredient.price_per_unit) * Decimal(quantity),
         source=source,
         reference_id=facture_id
     )
+
 def destocker_compose(user, compose_ingredient, quantity, facture_id, storage_depots,hospital, source):
     if storage_depots is None:
         get_storage_depots = Storage_depots.objects.filter(is_default=True).last()
@@ -565,7 +571,11 @@ def destocker_compose(user, compose_ingredient, quantity, facture_id, storage_de
         compose_ingredient=compose_ingredient,
         hospital = hospital,
         type="EXIT",
-        quantity=quantity,
+        stock_before = Decimal(stock.qte_stock) + Decimal(quantity),
+        stock_after= Decimal(stock.qte_stock),
+        quantity=Decimal(quantity),
+        unit_cost = Decimal(compose_ingredient.price_per_unit),
+        total_cost = Decimal(compose_ingredient.price_per_unit) * Decimal(quantity),
         source=source,
         reference_id=facture_id
     )
